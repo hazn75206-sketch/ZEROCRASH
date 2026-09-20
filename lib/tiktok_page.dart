@@ -109,8 +109,8 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
               materialProgressColors: ChewieProgressColors(
                 playedColor: primaryPurple, // Diubah ke ungu
                 handleColor: accentPurple, // Diubah ke ungu
-                backgroundColor: textGrey.withOpacity(0.3),
-                bufferedColor: textGrey.withOpacity(0.2),
+                backgroundColor: textGrey.withValues(alpha: 0.3),
+                bufferedColor: textGrey.withValues(alpha: 0.2),
               ),
             );
           });
@@ -174,10 +174,10 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
                 decoration: BoxDecoration(
                   color: cardDark,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: primaryPurple.withOpacity(0.3)),
+                  border: Border.all(color: primaryPurple.withValues(alpha: 0.3)),
                   boxShadow: [
                     BoxShadow(
-                      color: primaryPurple.withOpacity(0.2),
+                      color: primaryPurple.withValues(alpha: 0.2),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -194,7 +194,7 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
                         hintText: 'Contoh: https://vt.tiktok.com/xxx/',
                         hintStyle: TextStyle(color: textGrey),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: primaryPurple.withOpacity(0.5)),
+                          borderSide: BorderSide(color: primaryPurple.withValues(alpha: 0.5)),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -202,7 +202,7 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         filled: true,
-                        fillColor: const Color(0xFF00050B).withOpacity(0.3),
+                        fillColor: const Color(0xFF00050B).withValues(alpha: 0.3),
                         prefixIcon: Icon(Icons.link, color: accentPurple),
                         suffixIcon: _isLoading
                             ? Padding(
@@ -232,7 +232,7 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 4,
-                          shadowColor: primaryPurple.withOpacity(0.5),
+                          shadowColor: primaryPurple.withValues(alpha: 0.5),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -263,9 +263,9 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: primaryPurple.withOpacity(0.1),
+                    color: primaryPurple.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: primaryPurple.withOpacity(0.3)),
+                    border: Border.all(color: primaryPurple.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [
@@ -295,10 +295,10 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
                           decoration: BoxDecoration(
                             color: cardDark,
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: primaryPurple.withOpacity(0.3)),
+                            border: Border.all(color: primaryPurple.withValues(alpha: 0.3)),
                             boxShadow: [
                               BoxShadow(
-                                color: primaryPurple.withOpacity(0.2),
+                                color: primaryPurple.withValues(alpha: 0.2),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -336,10 +336,10 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
                                 Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: primaryPurple.withOpacity(0.5)),
+                                    border: Border.all(color: primaryPurple.withValues(alpha: 0.5)),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: primaryPurple.withOpacity(0.3),
+                                        color: primaryPurple.withValues(alpha: 0.3),
                                         blurRadius: 10,
                                         offset: Offset(0, 4),
                                       ),
@@ -357,9 +357,9 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
                                 Container(
                                   height: 200,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF00050B).withOpacity(0.5),
+                                    color: const Color(0xFF00050B).withValues(alpha: 0.5),
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: primaryPurple.withOpacity(0.3)),
+                                    border: Border.all(color: primaryPurple.withValues(alpha: 0.3)),
                                   ),
                                   child: Center(
                                     child: Column(
@@ -386,9 +386,9 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
                                 Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF00050B).withOpacity(0.3),
+                                    color: const Color(0xFF00050B).withValues(alpha: 0.3),
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: primaryPurple.withOpacity(0.2)),
+                                    border: Border.all(color: primaryPurple.withValues(alpha: 0.2)),
                                   ),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -436,7 +436,7 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     elevation: 4,
-                                    shadowColor: accentPurple.withOpacity(0.5),
+                                    shadowColor: accentPurple.withValues(alpha: 0.5),
                                   ),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -474,7 +474,7 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
                         Icon(
                           Icons.video_library,
                           size: 80,
-                          color: primaryPurple.withOpacity(0.3),
+                          color: primaryPurple.withValues(alpha: 0.3),
                         ),
                         SizedBox(height: 16),
                         Text(

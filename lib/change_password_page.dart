@@ -93,7 +93,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         backgroundColor: bgSecondary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: accentPurple.withOpacity(0.3)),
+          side: BorderSide(color: accentPurple.withValues(alpha: 0.3)),
         ),
         title: Row(
           children: [
@@ -193,7 +193,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             color: primaryWhite,
             fontFamily: 'Orbitron',
             fontWeight: FontWeight.bold,
-            shadows: [Shadow(color: primaryPurple.withOpacity(0.8), blurRadius: 10)],
+            shadows: [Shadow(color: primaryPurple.withValues(alpha: 0.8), blurRadius: 10)],
           ),
         ),
       ),
@@ -214,7 +214,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   gradient: purpleGradient,
                   boxShadow: [
                     BoxShadow(
-                      color: accentPurple.withOpacity(0.4),
+                      color: accentPurple.withValues(alpha: 0.4),
                       blurRadius: 20,
                       spreadRadius: 2,
                     )
@@ -265,7 +265,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: primaryPurple.withOpacity(0.4),
+                    color: primaryPurple.withValues(alpha: 0.4),
                     blurRadius: 10,
                     offset: Offset(0, 4),
                   ),

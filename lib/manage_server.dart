@@ -102,7 +102,7 @@ class _ManageServerPageState extends State<ManageServerPage> {
         backgroundColor: cardDark,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: accentRed.withOpacity(0.3)),
+          side: BorderSide(color: accentRed.withValues(alpha: 0.3)),
         ),
         title: const Text("Error", style: TextStyle(color: Colors.white)),
         content: Text(msg, style: const TextStyle(color: Colors.white70)),
@@ -123,7 +123,7 @@ class _ManageServerPageState extends State<ManageServerPage> {
         backgroundColor: cardDark,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: accentRed.withOpacity(0.3)),
+          side: BorderSide(color: accentRed.withValues(alpha: 0.3)),
         ),
         title: const Text("Tambah VPS", style: TextStyle(color: Colors.white)),
         content: Column(
@@ -164,7 +164,7 @@ class _ManageServerPageState extends State<ManageServerPage> {
           labelText: label,
           labelStyle: TextStyle(color: accentRed),
           enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: accentRed.withOpacity(0.5)),
+            borderSide: BorderSide(color: accentRed.withValues(alpha: 0.5)),
             borderRadius: BorderRadius.circular(12),
           ),
           focusedBorder: OutlineInputBorder(
@@ -214,7 +214,7 @@ class _ManageServerPageState extends State<ManageServerPage> {
                       color: cardDark,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: accentRed.withOpacity(0.2)),
+                        side: BorderSide(color: accentRed.withValues(alpha: 0.2)),
                       ),
                       child: ListTile(
                         title: Text("${vps['host']}", style: const TextStyle(color: Colors.white)),

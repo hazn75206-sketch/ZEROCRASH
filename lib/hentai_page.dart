@@ -249,7 +249,7 @@ class VideoCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -286,7 +286,7 @@ class VideoCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.7),
+                          color: Colors.black.withValues(alpha: 0.7),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -307,7 +307,7 @@ class VideoCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.5),
+                          color: Colors.black.withValues(alpha: 0.5),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -751,7 +751,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         "Total ${latestAnimeList.length} video terbaru",
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 14,
                         ),
                       ),
@@ -831,7 +831,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         "Halaman $currentPage",
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 14,
                         ),
                       ),
@@ -962,7 +962,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 "Menampilkan ${searchResults.length} hasil untuk '${_searchController.text}'",
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   fontSize: 14,
                 ),
               ),
@@ -1212,7 +1212,7 @@ class _DetailScreenState extends State<DetailScreen> with WidgetsBindingObserver
                 const SizedBox(height: 16),
                 ...animeDetail!.downloads.map((option) {
                   return Card(
-                    color: Colors.deepPurple.shade900.withOpacity(0.3),
+                    color: Colors.deepPurple.shade900.withValues(alpha: 0.3),
                     margin: const EdgeInsets.only(bottom: 12),
                     child: ExpansionTile(
                       leading: CircleAvatar(
@@ -1310,8 +1310,8 @@ class _DetailScreenState extends State<DetailScreen> with WidgetsBindingObserver
   @override
   void didChangeMetrics() {
     // Mendeteksi perubahan ukuran layar (fullscreen)
-    final physicalSize = WidgetsBinding.instance.window.physicalSize;
-    final pixelRatio = WidgetsBinding.instance.window.devicePixelRatio;
+    final physicalSize = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize;
+    final pixelRatio = WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
     final logicalSize = physicalSize / pixelRatio;
 
     // Jika lebar lebih besar dari tinggi, berarti landscape
@@ -1462,7 +1462,7 @@ class _DetailScreenState extends State<DetailScreen> with WidgetsBindingObserver
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.5),
+                          color: Colors.black.withValues(alpha: 0.5),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(

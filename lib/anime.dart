@@ -416,7 +416,7 @@ class _HomeAnimePageState extends State<HomeAnimePage> {
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.7),
+                      color: Colors.black.withValues(alpha: 0.7),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -2258,8 +2258,8 @@ class _AnimeEpisodePageState extends State<AnimeEpisodePage> with WidgetsBinding
   @override
   void didChangeMetrics() {
     // Mendeteksi perubahan ukuran layar (fullscreen)
-    final physicalSize = WidgetsBinding.instance.window.physicalSize;
-    final pixelRatio = WidgetsBinding.instance.window.devicePixelRatio;
+    final physicalSize = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize;
+    final pixelRatio = WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
     final logicalSize = physicalSize / pixelRatio;
 
     // Jika lebar lebih besar dari tinggi, berarti landscape
@@ -2800,7 +2800,7 @@ class _AnimeEpisodePageState extends State<AnimeEpisodePage> with WidgetsBinding
                   right: 10,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.7),
+                      color: Colors.black.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: PopupMenuButton<int>(
@@ -3063,7 +3063,7 @@ class _AnimeEpisodePageState extends State<AnimeEpisodePage> with WidgetsBinding
                     height: 40,
                     decoration: BoxDecoration(
                       color: isCurrentEpisode
-                          ? Colors.white.withOpacity(0.2)
+                          ? Colors.white.withValues(alpha: 0.2)
                           : const Color(0xFF102A43),
                       borderRadius: BorderRadius.circular(4),
                     ),

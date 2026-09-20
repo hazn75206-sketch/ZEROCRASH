@@ -90,7 +90,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
       builder: (context) => Container(
         decoration: BoxDecoration(
           border: Border(
-            top: BorderSide(color: borderMain.withOpacity(0.6), width: 1),
+            top: BorderSide(color: borderMain.withValues(alpha: 0.6), width: 1),
           ),
         ),
         child: SafeArea(
@@ -113,7 +113,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                   decoration: BoxDecoration(
                     color: const Color(0xFF1A0000),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: borderMain.withOpacity(0.5)),
+                    border: Border.all(color: borderMain.withValues(alpha: 0.5)),
                   ),
                   child: Icon(Icons.camera_alt, color: accentRed, size: 18),
                 ),
@@ -137,7 +137,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                   decoration: BoxDecoration(
                     color: const Color(0xFF1A0000),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: borderMain.withOpacity(0.5)),
+                    border: Border.all(color: borderMain.withValues(alpha: 0.5)),
                   ),
                   child: Icon(Icons.photo_library, color: accentRedDim, size: 18),
                 ),
@@ -188,7 +188,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
       decoration: BoxDecoration(
         color: const Color(0xFF1A0000),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: accentRedDark.withOpacity(0.5), width: 0.8),
+        border: Border.all(color: accentRedDark.withValues(alpha: 0.5), width: 0.8),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -200,7 +200,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
               color: accentRed,
               shape: BoxShape.circle,
               boxShadow: [
-                BoxShadow(color: accentRed.withOpacity(0.5), blurRadius: 6),
+                BoxShadow(color: accentRed.withValues(alpha: 0.5), blurRadius: 6),
               ],
             ),
           ),
@@ -246,7 +246,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                 decoration: BoxDecoration(
                   color: const Color(0xFF1A0000),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFF3D0000).withOpacity(0.5), width: 0.5),
+                  border: Border.all(color: const Color(0xFF3D0000).withValues(alpha: 0.5), width: 0.5),
                 ),
                 child: Icon(icon, color: accentRedDark, size: 15),
               ),
@@ -295,18 +295,18 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
             gradient: LinearGradient(
               colors: [
                 const Color(0xFF1A0000),
-                const Color(0xFF2A0000).withOpacity(0.6 + _glowAnimation.value * 0.4),
+                const Color(0xFF2A0000).withValues(alpha: 0.6 + _glowAnimation.value * 0.4),
                 const Color(0xFF1A0000),
               ],
             ),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: accentRedDark.withOpacity(0.3 + _glowAnimation.value * 0.3),
+              color: accentRedDark.withValues(alpha: 0.3 + _glowAnimation.value * 0.3),
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: accentRed.withOpacity(_glowAnimation.value * 0.08),
+                color: accentRed.withValues(alpha: _glowAnimation.value * 0.08),
                 blurRadius: 25,
                 spreadRadius: 2,
               ),
@@ -394,7 +394,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
               gradient: LinearGradient(
                 colors: [
                   Colors.transparent,
-                  borderMain.withOpacity(0.5),
+                  borderMain.withValues(alpha: 0.5),
                   Colors.transparent,
                 ],
               ),
@@ -427,17 +427,17 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                accentRedDark.withOpacity(0.4 + _glowAnimation.value * 0.3),
+                                accentRedDark.withValues(alpha: 0.4 + _glowAnimation.value * 0.3),
                                 const Color(0xFF1A0000),
                               ],
                             ),
                             border: Border.all(
-                              color: accentRedDark.withOpacity(0.3 + _glowAnimation.value * 0.3),
+                              color: accentRedDark.withValues(alpha: 0.3 + _glowAnimation.value * 0.3),
                               width: 2,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: accentRed.withOpacity(_glowAnimation.value * 0.12),
+                                color: accentRed.withValues(alpha: _glowAnimation.value * 0.12),
                                 blurRadius: 30,
                                 spreadRadius: 4,
                               ),
@@ -453,7 +453,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                                     child: Icon(
                                       FontAwesomeIcons.userAstronaut,
                                       size: 40,
-                                      color: Colors.white.withOpacity(0.25),
+                                      color: Colors.white.withValues(alpha: 0.25),
                                     ),
                                   ),
                           ),
@@ -471,7 +471,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                           border: Border.all(color: bgDark, width: 3),
                           boxShadow: [
                             BoxShadow(
-                              color: accentRed.withOpacity(0.3),
+                              color: accentRed.withValues(alpha: 0.3),
                               blurRadius: 8,
                             ),
                           ],
@@ -567,7 +567,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
             color: accentRed,
             borderRadius: BorderRadius.circular(2),
             boxShadow: [
-              BoxShadow(color: accentRed.withOpacity(0.4), blurRadius: 6),
+              BoxShadow(color: accentRed.withValues(alpha: 0.4), blurRadius: 6),
             ],
           ),
         ),
@@ -596,7 +596,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
             gradient: LinearGradient(
               colors: [
                 Colors.transparent,
-                borderMain.withOpacity(0.4),
+                borderMain.withValues(alpha: 0.4),
                 Colors.transparent,
               ],
             ),

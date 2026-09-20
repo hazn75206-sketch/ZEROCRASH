@@ -166,14 +166,14 @@ class _InfoPageState extends State<InfoPage> with TickerProviderStateMixin {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: accentGold.withOpacity(
+                      color: accentGold.withValues(alpha: 
                           0.3 + _pulseAnimation.value * 0.7),
                       width: 2,
                     ),
                     boxShadow: [
                       BoxShadow(
                         color: accentGold
-                            .withOpacity(_pulseAnimation.value * 0.4),
+                            .withValues(alpha: _pulseAnimation.value * 0.4),
                         blurRadius: 30,
                         spreadRadius: 5,
                       ),
@@ -194,7 +194,7 @@ class _InfoPageState extends State<InfoPage> with TickerProviderStateMixin {
             Text(
               "AUTHENTICATING",
               style: TextStyle(
-                color: accentGold.withOpacity(0.6),
+                color: accentGold.withValues(alpha: 0.6),
                 fontFamily: 'Orbitron',
                 fontWeight: FontWeight.w700,
                 fontSize: 11,
@@ -218,12 +218,12 @@ class _InfoPageState extends State<InfoPage> with TickerProviderStateMixin {
             color: cardBg,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: apiStatusColor.withOpacity(0.3 + _glowAnimation.value * 0.3),
+              color: apiStatusColor.withValues(alpha: 0.3 + _glowAnimation.value * 0.3),
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: apiStatusColor.withOpacity(_glowAnimation.value * 0.08),
+                color: apiStatusColor.withValues(alpha: _glowAnimation.value * 0.08),
                 blurRadius: 30,
                 spreadRadius: 2,
               ),
@@ -240,7 +240,7 @@ class _InfoPageState extends State<InfoPage> with TickerProviderStateMixin {
                   boxShadow: [
                     BoxShadow(
                       color: apiStatusColor
-                          .withOpacity(_glowAnimation.value * 0.8),
+                          .withValues(alpha: _glowAnimation.value * 0.8),
                       blurRadius: 12,
                       spreadRadius: 3,
                     ),
@@ -268,10 +268,10 @@ class _InfoPageState extends State<InfoPage> with TickerProviderStateMixin {
                   color: const Color(0xFF1A0F00),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                      color: borderLight.withOpacity(0.5), width: 0.5),
+                      color: borderLight.withValues(alpha: 0.5), width: 0.5),
                 ),
                 child: Icon(Icons.memory,
-                    color: textSub.withOpacity(0.4), size: 16),
+                    color: textSub.withValues(alpha: 0.4), size: 16),
               ),
             ],
           ),
@@ -293,7 +293,7 @@ class _InfoPageState extends State<InfoPage> with TickerProviderStateMixin {
               borderRadius: BorderRadius.circular(2),
               boxShadow: [
                 BoxShadow(
-                  color: accentGold.withOpacity(0.4),
+                  color: accentGold.withValues(alpha: 0.4),
                   blurRadius: 6,
                 ),
               ],
@@ -356,7 +356,7 @@ class _InfoPageState extends State<InfoPage> with TickerProviderStateMixin {
                           Text(
                             "0${index + 1}",
                             style: TextStyle(
-                              color: deepGold.withOpacity(0.4),
+                              color: deepGold.withValues(alpha: 0.4),
                               fontFamily: 'Orbitron',
                               fontWeight: FontWeight.w900,
                               fontSize: 10,
@@ -410,7 +410,7 @@ class _InfoPageState extends State<InfoPage> with TickerProviderStateMixin {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                const Color(0xFF2A1A00).withOpacity(0.6 + _pulseAnimation.value * 0.2),
+                const Color(0xFF2A1A00).withValues(alpha: 0.6 + _pulseAnimation.value * 0.2),
                 const Color(0xFF000000),
               ],
               begin: Alignment.topCenter,
@@ -419,13 +419,13 @@ class _InfoPageState extends State<InfoPage> with TickerProviderStateMixin {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: const Color(0xFF8B6508)
-                  .withOpacity(0.3 + _pulseAnimation.value * 0.25),
+                  .withValues(alpha: 0.3 + _pulseAnimation.value * 0.25),
               width: 1.2,
             ),
             boxShadow: [
               BoxShadow(
                 color: const Color(0xFFB8860B)
-                    .withOpacity(_pulseAnimation.value * 0.06),
+                    .withValues(alpha: _pulseAnimation.value * 0.06),
                 blurRadius: 40,
                 spreadRadius: 4,
               ),
@@ -441,7 +441,7 @@ class _InfoPageState extends State<InfoPage> with TickerProviderStateMixin {
                   color: const Color(0xFF3D2A00),
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
-                      color: const Color(0xFF5C3D00).withOpacity(0.5),
+                      color: const Color(0xFF5C3D00).withValues(alpha: 0.5),
                       width: 0.5),
                 ),
                 child: const Row(
@@ -482,7 +482,7 @@ class _InfoPageState extends State<InfoPage> with TickerProviderStateMixin {
                   color: const Color(0xFF1A0F00),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                      color: const Color(0xFF8B6508).withOpacity(0.35),
+                      color: const Color(0xFF8B6508).withValues(alpha: 0.35),
                       width: 1),
                 ),
                 child: const Row(
@@ -533,7 +533,7 @@ class _InfoPageState extends State<InfoPage> with TickerProviderStateMixin {
             shape: BoxShape.circle,
             color: const Color(0xFF0D0800),
             border: Border.all(
-                color: const Color(0xFF2A1A00).withOpacity(0.6), width: 1),
+                color: const Color(0xFF2A1A00).withValues(alpha: 0.6), width: 1),
           ),
           child: const Center(
             child: Icon(Icons.shield_moon_rounded,
@@ -625,7 +625,7 @@ class _InfoPageState extends State<InfoPage> with TickerProviderStateMixin {
                         borderRadius: BorderRadius.circular(2),
                         boxShadow: [
                           BoxShadow(
-                            color: accentGold.withOpacity(0.5),
+                            color: accentGold.withValues(alpha: 0.5),
                             blurRadius: 8,
                           ),
                         ],

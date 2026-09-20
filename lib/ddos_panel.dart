@@ -90,7 +90,7 @@ class _AttackPanelState extends State<AttackPanel> with TickerProviderStateMixin
             side: BorderSide(color: accentPurple) // Border diubah ke ungu
         ),
         title: Text(title, style: TextStyle(color: primaryWhite, fontFamily: 'Orbitron')),
-        content: Text(msg, style: TextStyle(color: primaryWhite.withOpacity(0.7), fontFamily: 'ShareTechMono')),
+        content: Text(msg, style: TextStyle(color: primaryWhite.withValues(alpha: 0.7), fontFamily: 'ShareTechMono')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -187,7 +187,7 @@ class _AttackPanelState extends State<AttackPanel> with TickerProviderStateMixin
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text("⏱ ${attackDuration.toInt()} seconds",
-                        style: TextStyle(color: primaryWhite.withOpacity(0.7), fontSize: 14)),
+                        style: TextStyle(color: primaryWhite.withValues(alpha: 0.7), fontSize: 14)),
                     Slider(
                       value: attackDuration,
                       min: 10,
@@ -195,7 +195,7 @@ class _AttackPanelState extends State<AttackPanel> with TickerProviderStateMixin
                       divisions: 29,
                       label: "${attackDuration.toInt()}s",
                       activeColor: accentPurple, // Slider aktif diubah ke ungu
-                      inactiveColor: primaryWhite.withOpacity(0.1),
+                      inactiveColor: primaryWhite.withValues(alpha: 0.1),
                       onChanged: (value) {
                         setState(() => attackDuration = value);
                       },
@@ -256,7 +256,7 @@ class _AttackPanelState extends State<AttackPanel> with TickerProviderStateMixin
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     elevation: 6,
-                    shadowColor: accentPurple.withOpacity(0.6), // Bayangan diubah ke ungu
+                    shadowColor: accentPurple.withValues(alpha: 0.6), // Bayangan diubah ke ungu
                   ),
                 ),
               ),
@@ -273,10 +273,10 @@ class _AttackPanelState extends State<AttackPanel> with TickerProviderStateMixin
       decoration: BoxDecoration(
         color: cardDark,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: accentPurple.withOpacity(0.5), width: 1), // Border diubah ke ungu
+        border: Border.all(color: accentPurple.withValues(alpha: 0.5), width: 1), // Border diubah ke ungu
         boxShadow: [
           BoxShadow(
-            color: accentPurple.withOpacity(0.2), // Bayangan diubah ke ungu
+            color: accentPurple.withValues(alpha: 0.2), // Bayangan diubah ke ungu
             blurRadius: 8,
             spreadRadius: 1,
           )

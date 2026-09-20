@@ -101,10 +101,10 @@ class _NikCheckerPageState extends State<NikCheckerPage> with SingleTickerProvid
       decoration: BoxDecoration(
         color: cardDark,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: primaryPurple.withOpacity(0.3), width: 1), // Ubah ke ungu
+        border: Border.all(color: primaryPurple.withValues(alpha: 0.3), width: 1), // Ubah ke ungu
         boxShadow: [
           BoxShadow(
-            color: primaryPurple.withOpacity(0.2), // Ubah ke ungu
+            color: primaryPurple.withValues(alpha: 0.2), // Ubah ke ungu
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -168,13 +168,13 @@ class _NikCheckerPageState extends State<NikCheckerPage> with SingleTickerProvid
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF00050B).withOpacity(0.3),
+        color: const Color(0xFF00050B).withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: primaryPurple.withOpacity(0.2)), // Ubah ke ungu
+        border: Border.all(color: primaryPurple.withValues(alpha: 0.2)), // Ubah ke ungu
         gradient: LinearGradient(
           colors: [
             Colors.transparent,
-            primaryPurple.withOpacity(0.05), // Ubah ke ungu
+            primaryPurple.withValues(alpha: 0.05), // Ubah ke ungu
           ],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
@@ -210,9 +210,9 @@ class _NikCheckerPageState extends State<NikCheckerPage> with SingleTickerProvid
           if (onCopy != null)
             Container(
               decoration: BoxDecoration(
-                color: primaryPurple.withOpacity(0.2), // Ubah ke ungu
+                color: primaryPurple.withValues(alpha: 0.2), // Ubah ke ungu
                 shape: BoxShape.circle,
-                border: Border.all(color: primaryPurple.withOpacity(0.3)), // Ubah ke ungu
+                border: Border.all(color: primaryPurple.withValues(alpha: 0.3)), // Ubah ke ungu
               ),
               child: IconButton(
                 icon: Icon(copyIcon, color: lightPurple, size: 18), // Ubah ke ungu
@@ -277,10 +277,10 @@ class _NikCheckerPageState extends State<NikCheckerPage> with SingleTickerProvid
                 decoration: BoxDecoration(
                   color: cardDark,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: primaryPurple.withOpacity(0.3)), // Ubah ke ungu
+                  border: Border.all(color: primaryPurple.withValues(alpha: 0.3)), // Ubah ke ungu
                   boxShadow: [
                     BoxShadow(
-                      color: primaryPurple.withOpacity(0.2), // Ubah ke ungu
+                      color: primaryPurple.withValues(alpha: 0.2), // Ubah ke ungu
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -298,7 +298,7 @@ class _NikCheckerPageState extends State<NikCheckerPage> with SingleTickerProvid
                         hintText: 'Contoh: 5206085405880001',
                         hintStyle: TextStyle(color: accentGrey),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: primaryPurple.withOpacity(0.5)), // Ubah ke ungu
+                          borderSide: BorderSide(color: primaryPurple.withValues(alpha: 0.5)), // Ubah ke ungu
                           borderRadius: BorderRadius.circular(12),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -306,7 +306,7 @@ class _NikCheckerPageState extends State<NikCheckerPage> with SingleTickerProvid
                           borderRadius: BorderRadius.circular(12),
                         ),
                         filled: true,
-                        fillColor: const Color(0xFF00050B).withOpacity(0.3),
+                        fillColor: const Color(0xFF00050B).withValues(alpha: 0.3),
                         suffixIcon: _isLoading
                             ? Padding(
                           padding: const EdgeInsets.all(12.0),
@@ -336,7 +336,7 @@ class _NikCheckerPageState extends State<NikCheckerPage> with SingleTickerProvid
                             borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 4,
-                          shadowColor: primaryPurple.withOpacity(0.5), // Ubah ke ungu
+                          shadowColor: primaryPurple.withValues(alpha: 0.5), // Ubah ke ungu
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -366,9 +366,9 @@ class _NikCheckerPageState extends State<NikCheckerPage> with SingleTickerProvid
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.purple.withOpacity(0.1), // Ubah ke ungu transparan
+                    color: Colors.purple.withValues(alpha: 0.1), // Ubah ke ungu transparan
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.purple.withOpacity(0.3)),
+                    border: Border.all(color: Colors.purple.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [

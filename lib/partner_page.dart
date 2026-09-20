@@ -42,8 +42,8 @@ class _PartnerPageState extends State<PartnerPage> {
   final Color primaryPurple = Colors.grey.shade800;
   final Color accentPurple = Colors.white;
   final Color primaryWhite = Colors.white;
-  final Color cardGlass = Colors.white.withOpacity(0.05);
-  final Color borderGlass = Colors.white.withOpacity(0.1);
+  final Color cardGlass = Colors.white.withValues(alpha: 0.05);
+  final Color borderGlass = Colors.white.withValues(alpha: 0.1);
 
   @override
   void initState() {
@@ -159,7 +159,7 @@ class _PartnerPageState extends State<PartnerPage> {
         backgroundColor: bgDark,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: accentPurple.withOpacity(0.3)),
+          side: BorderSide(color: accentPurple.withValues(alpha: 0.3)),
         ),
         title: Row(
           children: [
@@ -239,7 +239,7 @@ class _PartnerPageState extends State<PartnerPage> {
         border: Border.all(color: borderGlass),
         boxShadow: [
           BoxShadow(
-            color: primaryPurple.withOpacity(0.1),
+            color: primaryPurple.withValues(alpha: 0.1),
             blurRadius: 15,
             offset: Offset(0, 5),
           ),
@@ -253,7 +253,7 @@ class _PartnerPageState extends State<PartnerPage> {
               Container(
                 padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: primaryPurple.withOpacity(0.2),
+                  color: primaryPurple.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: accentPurple),
@@ -292,7 +292,7 @@ class _PartnerPageState extends State<PartnerPage> {
           Container(
             padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: primaryPurple.withOpacity(0.2),
+              color: primaryPurple.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.person, color: accentPurple),
@@ -320,9 +320,9 @@ class _PartnerPageState extends State<PartnerPage> {
           ),
           Container(
             decoration: BoxDecoration(
-              color: accentPurple.withOpacity(0.1),
+              color: accentPurple.withValues(alpha: 0.1),
               shape: BoxShape.circle,
-              border: Border.all(color: accentPurple.withOpacity(0.3)),
+              border: Border.all(color: accentPurple.withValues(alpha: 0.3)),
             ),
             child: IconButton(
               icon: Icon(Icons.delete_outline, color: accentPurple),
@@ -333,7 +333,7 @@ class _PartnerPageState extends State<PartnerPage> {
                     backgroundColor: bgDark,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(color: accentPurple.withOpacity(0.3)),
+                      side: BorderSide(color: accentPurple.withValues(alpha: 0.3)),
                     ),
                     title: Text("Konfirmasi", style: TextStyle(color: primaryWhite)),
                     content: Text("Hapus user ini?", style: TextStyle(color: Colors.white70)),
@@ -410,7 +410,7 @@ class _PartnerPageState extends State<PartnerPage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [bgDark, primaryPurple.withOpacity(0.1), bgDark],
+            colors: [bgDark, primaryPurple.withValues(alpha: 0.1), bgDark],
           ),
         ),
         child: SafeArea(
@@ -433,7 +433,7 @@ class _PartnerPageState extends State<PartnerPage> {
                     letterSpacing: 2,
                     shadows: [
                       Shadow(
-                        color: primaryPurple.withOpacity(0.8),
+                        color: primaryPurple.withValues(alpha: 0.8),
                         blurRadius: 10,
                       ),
                     ],
@@ -459,7 +459,7 @@ class _PartnerPageState extends State<PartnerPage> {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: primaryPurple.withOpacity(0.3),
+                            color: primaryPurple.withValues(alpha: 0.3),
                             blurRadius: 10,
                             offset: Offset(0, 4),
                           ),
@@ -517,7 +517,7 @@ class _PartnerPageState extends State<PartnerPage> {
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.2),
+                        color: Colors.black.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: borderGlass),
                       ),
@@ -545,7 +545,7 @@ class _PartnerPageState extends State<PartnerPage> {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: primaryPurple.withOpacity(0.4),
+                            color: primaryPurple.withValues(alpha: 0.4),
                             blurRadius: 10,
                             offset: Offset(0, 4),
                           ),
@@ -590,7 +590,7 @@ class _PartnerPageState extends State<PartnerPage> {
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.2),
+                        color: Colors.black.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: borderGlass),
                       ),

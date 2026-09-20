@@ -23,7 +23,6 @@ class MyApp extends StatelessWidget {
         colorScheme: const ColorScheme.dark().copyWith(
           primary: const Color(0xFF00E5FF),
           secondary: Colors.white,
-          background: const Color(0xFF00050B),
           surface: const Color(0xFF0A1118),
         ),
         primaryColor: const Color(0xFF00E5FF),
@@ -49,9 +48,9 @@ class MyApp extends StatelessWidget {
         floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.grey),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: Colors.black.withOpacity(0.3),
+          fillColor: Colors.black.withValues(alpha: 0.3),
           focusedBorder: OutlineInputBorder(borderSide: const BorderSide(color: Colors.grey), borderRadius: BorderRadius.circular(12)),
-          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey.withOpacity(0.6)), borderRadius: BorderRadius.circular(12)),
+          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.6)), borderRadius: BorderRadius.circular(12)),
         ),
         snackBarTheme: SnackBarThemeData(backgroundColor: Colors.grey.shade800, contentTextStyle: const TextStyle(color: Colors.white)),
       ),

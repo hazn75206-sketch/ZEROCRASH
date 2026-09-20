@@ -46,8 +46,8 @@ class _OwnerPageState extends State<OwnerPage> {
   final Color accentPurple = const Color(0xFF00E5FF);
   final Color primaryWhite = Colors.white;
   final Color textGrey = const Color(0xFF78909C);
-  final Color cardGlass = const Color(0xFF00E5FF).withOpacity(0.05);
-  final Color borderGlass = const Color(0xFF00E5FF).withOpacity(0.1);
+  final Color cardGlass = const Color(0xFF00E5FF).withValues(alpha: 0.05);
+  final Color borderGlass = const Color(0xFF00E5FF).withValues(alpha: 0.1);
 
   @override
   void initState() {
@@ -197,7 +197,7 @@ class _OwnerPageState extends State<OwnerPage> {
         backgroundColor: bgDark,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: accentPurple.withOpacity(0.3)),
+          side: BorderSide(color: accentPurple.withValues(alpha: 0.3)),
         ),
         title: Row(
           children: [
@@ -277,7 +277,7 @@ class _OwnerPageState extends State<OwnerPage> {
         border: Border.all(color: borderGlass),
         boxShadow: [
           BoxShadow(
-            color: primaryPurple.withOpacity(0.1),
+            color: primaryPurple.withValues(alpha: 0.1),
             blurRadius: 15,
             offset: Offset(0, 5),
           ),
@@ -291,7 +291,7 @@ class _OwnerPageState extends State<OwnerPage> {
               Container(
                 padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: primaryPurple.withOpacity(0.2),
+                  color: primaryPurple.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: accentPurple),
@@ -330,7 +330,7 @@ class _OwnerPageState extends State<OwnerPage> {
           Container(
             padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: primaryPurple.withOpacity(0.2),
+              color: primaryPurple.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.person, color: accentPurple),
@@ -359,9 +359,9 @@ class _OwnerPageState extends State<OwnerPage> {
           // Tombol Delete
           Container(
             decoration: BoxDecoration(
-              color: accentPurple.withOpacity(0.1),
+              color: accentPurple.withValues(alpha: 0.1),
               shape: BoxShape.circle,
-              border: Border.all(color: accentPurple.withOpacity(0.3)),
+              border: Border.all(color: accentPurple.withValues(alpha: 0.3)),
             ),
             child: IconButton(
               icon: Icon(Icons.delete_outline, color: accentPurple),
@@ -372,7 +372,7 @@ class _OwnerPageState extends State<OwnerPage> {
                     backgroundColor: bgDark,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(color: accentPurple.withOpacity(0.3)),
+                      side: BorderSide(color: accentPurple.withValues(alpha: 0.3)),
                     ),
                     title: Text("Konfirmasi", style: TextStyle(color: primaryWhite)),
                     content: Text("Hapus user ini?", style: TextStyle(color: textGrey)),
@@ -449,7 +449,7 @@ class _OwnerPageState extends State<OwnerPage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [bgDark, primaryPurple.withOpacity(0.1), bgDark],
+            colors: [bgDark, primaryPurple.withValues(alpha: 0.1), bgDark],
           ),
         ),
         child: SafeArea(
@@ -472,7 +472,7 @@ class _OwnerPageState extends State<OwnerPage> {
                     letterSpacing: 2,
                     shadows: [
                       Shadow(
-                        color: primaryPurple.withOpacity(0.8),
+                        color: primaryPurple.withValues(alpha: 0.8),
                         blurRadius: 10,
                       ),
                     ],
@@ -498,7 +498,7 @@ class _OwnerPageState extends State<OwnerPage> {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: primaryPurple.withOpacity(0.3),
+                            color: primaryPurple.withValues(alpha: 0.3),
                             blurRadius: 10,
                             offset: Offset(0, 4),
                           ),
@@ -556,7 +556,7 @@ class _OwnerPageState extends State<OwnerPage> {
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF00050B).withOpacity(0.2),
+                        color: const Color(0xFF00050B).withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: borderGlass),
                       ),
@@ -584,7 +584,7 @@ class _OwnerPageState extends State<OwnerPage> {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: primaryPurple.withOpacity(0.4),
+                            color: primaryPurple.withValues(alpha: 0.4),
                             blurRadius: 10,
                             offset: Offset(0, 4),
                           ),
@@ -645,7 +645,7 @@ class _OwnerPageState extends State<OwnerPage> {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.blue.withOpacity(0.4),
+                            color: Colors.blue.withValues(alpha: 0.4),
                             blurRadius: 10,
                             offset: Offset(0, 4),
                           ),
@@ -690,7 +690,7 @@ class _OwnerPageState extends State<OwnerPage> {
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF00050B).withOpacity(0.2),
+                        color: const Color(0xFF00050B).withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: borderGlass),
                       ),

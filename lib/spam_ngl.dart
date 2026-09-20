@@ -146,10 +146,10 @@ class _NglPageState extends State<NglPage> {
                 decoration: BoxDecoration(
                   color: bgSecondary,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: primaryPurple.withOpacity(0.3)),
+                  border: Border.all(color: primaryPurple.withValues(alpha: 0.3)),
                   boxShadow: [
                     BoxShadow(
-                      color: primaryPurple.withOpacity(0.2),
+                      color: primaryPurple.withValues(alpha: 0.2),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -166,7 +166,7 @@ class _NglPageState extends State<NglPage> {
                         hintText: "contoh: username_ngl",
                         hintStyle: TextStyle(color: textGrey),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: primaryPurple.withOpacity(0.5)),
+                          borderSide: BorderSide(color: primaryPurple.withValues(alpha: 0.5)),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -174,7 +174,7 @@ class _NglPageState extends State<NglPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         filled: true,
-                        fillColor: const Color(0xFF00050B).withOpacity(0.3),
+                        fillColor: const Color(0xFF00050B).withValues(alpha: 0.3),
                         prefixIcon: Icon(Icons.person, color: accentPurple),
                       ),
                     ),
@@ -188,7 +188,7 @@ class _NglPageState extends State<NglPage> {
                         hintText: "Masukkan pesan yang ingin dikirim...",
                         hintStyle: TextStyle(color: textGrey),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: primaryPurple.withOpacity(0.5)),
+                          borderSide: BorderSide(color: primaryPurple.withValues(alpha: 0.5)),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -196,7 +196,7 @@ class _NglPageState extends State<NglPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         filled: true,
-                        fillColor: const Color(0xFF00050B).withOpacity(0.3),
+                        fillColor: const Color(0xFF00050B).withValues(alpha: 0.3),
                         prefixIcon: Icon(Icons.message, color: accentPurple),
                       ),
                       maxLines: 3,
@@ -213,7 +213,7 @@ class _NglPageState extends State<NglPage> {
                 decoration: BoxDecoration(
                   color: bgSecondary,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: primaryPurple.withOpacity(0.3)),
+                  border: Border.all(color: primaryPurple.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -238,7 +238,7 @@ class _NglPageState extends State<NglPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 4,
-                          shadowColor: primaryPurple.withOpacity(0.5),
+                          shadowColor: primaryPurple.withValues(alpha: 0.5),
                         ),
                       ),
                     ),
@@ -263,7 +263,7 @@ class _NglPageState extends State<NglPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 4,
-                          shadowColor: accentPurple.withOpacity(0.5),
+                          shadowColor: accentPurple.withValues(alpha: 0.5),
                         ),
                       ),
                     ),
@@ -280,7 +280,7 @@ class _NglPageState extends State<NglPage> {
                   decoration: BoxDecoration(
                     color: bgSecondary,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: primaryPurple.withOpacity(0.3)),
+                    border: Border.all(color: primaryPurple.withValues(alpha: 0.3)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -316,9 +316,9 @@ class _NglPageState extends State<NglPage> {
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF00050B).withOpacity(0.3),
+                            color: const Color(0xFF00050B).withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: primaryPurple.withOpacity(0.2)),
+                            border: Border.all(color: primaryPurple.withValues(alpha: 0.2)),
                           ),
                           child: SingleChildScrollView(
                             child: Column(
@@ -346,9 +346,9 @@ class _NglPageState extends State<NglPage> {
                         Container(
                           padding: EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: primaryPurple.withOpacity(0.1),
+                            color: primaryPurple.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: primaryPurple.withOpacity(0.3)),
+                            border: Border.all(color: primaryPurple.withValues(alpha: 0.3)),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -381,9 +381,9 @@ class _NglPageState extends State<NglPage> {
                         margin: EdgeInsets.only(top: 12),
                         padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF00050B).withOpacity(0.3),
+                          color: const Color(0xFF00050B).withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: primaryPurple.withOpacity(0.1)),
+                          border: Border.all(color: primaryPurple.withValues(alpha: 0.1)),
                         ),
                         child: Row(
                           children: [

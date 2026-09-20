@@ -104,8 +104,8 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
               materialProgressColors: ChewieProgressColors(
                 playedColor: primaryPurple, // Diubah ke ungu
                 handleColor: lightPurple,   // Diubah ke ungu
-                backgroundColor: accentGrey.withOpacity(0.3),
-                bufferedColor: accentGrey.withOpacity(0.2),
+                backgroundColor: accentGrey.withValues(alpha: 0.3),
+                bufferedColor: accentGrey.withValues(alpha: 0.2),
               ),
             );
           });
@@ -167,10 +167,10 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
             decoration: BoxDecoration(
               color: cardDark,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: primaryPurple.withOpacity(0.3)), // Diubah ke ungu
+              border: Border.all(color: primaryPurple.withValues(alpha: 0.3)), // Diubah ke ungu
               boxShadow: [
                 BoxShadow(
-                  color: primaryPurple.withOpacity(0.2), // Diubah ke ungu
+                  color: primaryPurple.withValues(alpha: 0.2), // Diubah ke ungu
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
@@ -192,7 +192,7 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
                           media['thumbnail'] ?? media['url'],
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(
-                            color: const Color(0xFF00050B).withOpacity(0.5),
+                            color: const Color(0xFF00050B).withValues(alpha: 0.5),
                             child: Icon(Icons.videocam, color: lightPurple), // Diubah ke ungu
                           ),
                         ),
@@ -202,7 +202,7 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF00050B).withOpacity(0.7),
+                              color: const Color(0xFF00050B).withValues(alpha: 0.7),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(Icons.play_arrow, color: primaryWhite, size: 16),
@@ -214,7 +214,7 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
                       media['url'],
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
-                        color: const Color(0xFF00050B).withOpacity(0.5),
+                        color: const Color(0xFF00050B).withValues(alpha: 0.5),
                         child: Icon(Icons.photo, color: lightPurple), // Diubah ke ungu
                       ),
                     ),
@@ -265,8 +265,8 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
             materialProgressColors: ChewieProgressColors(
               playedColor: primaryPurple, // Diubah ke ungu
               handleColor: lightPurple,   // Diubah ke ungu
-              backgroundColor: accentGrey.withOpacity(0.3),
-              bufferedColor: accentGrey.withOpacity(0.2),
+              backgroundColor: accentGrey.withValues(alpha: 0.3),
+              bufferedColor: accentGrey.withValues(alpha: 0.2),
             ),
           );
         });
@@ -302,10 +302,10 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
                 decoration: BoxDecoration(
                   color: cardDark,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: primaryPurple.withOpacity(0.3)), // Diubah ke ungu
+                  border: Border.all(color: primaryPurple.withValues(alpha: 0.3)), // Diubah ke ungu
                   boxShadow: [
                     BoxShadow(
-                      color: primaryPurple.withOpacity(0.2), // Diubah ke ungu
+                      color: primaryPurple.withValues(alpha: 0.2), // Diubah ke ungu
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -322,7 +322,7 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
                         hintText: 'Contoh: https://www.instagram.com/reel/xxx/',
                         hintStyle: TextStyle(color: accentGrey),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: primaryPurple.withOpacity(0.5)), // Diubah ke ungu
+                          borderSide: BorderSide(color: primaryPurple.withValues(alpha: 0.5)), // Diubah ke ungu
                           borderRadius: BorderRadius.circular(12),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -330,7 +330,7 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         filled: true,
-                        fillColor: const Color(0xFF00050B).withOpacity(0.3),
+                        fillColor: const Color(0xFF00050B).withValues(alpha: 0.3),
                         prefixIcon: Icon(Icons.camera_alt, color: lightPurple), // Diubah ke ungu
                         suffixIcon: _isLoading
                             ? const Padding(
@@ -360,7 +360,7 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 4,
-                          shadowColor: primaryPurple.withOpacity(0.5), // Diubah ke ungu
+                          shadowColor: primaryPurple.withValues(alpha: 0.5), // Diubah ke ungu
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -390,9 +390,9 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.purple.withOpacity(0.1), // Diubah ke ungu transparan
+                    color: Colors.purple.withValues(alpha: 0.1), // Diubah ke ungu transparan
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.purple.withOpacity(0.3)), // Diubah ke ungu
+                    border: Border.all(color: Colors.purple.withValues(alpha: 0.3)), // Diubah ke ungu
                   ),
                   child: Row(
                     children: [
@@ -417,10 +417,10 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
                   decoration: BoxDecoration(
                     color: cardDark,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: primaryPurple.withOpacity(0.3)), // Diubah ke ungu
+                    border: Border.all(color: primaryPurple.withValues(alpha: 0.3)), // Diubah ke ungu
                     boxShadow: [
                       BoxShadow(
-                        color: primaryPurple.withOpacity(0.2), // Diubah ke ungu
+                        color: primaryPurple.withValues(alpha: 0.2), // Diubah ke ungu
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -460,7 +460,7 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: primaryPurple.withOpacity(0.5)), // Diubah ke ungu
+                          border: Border.all(color: primaryPurple.withValues(alpha: 0.5)), // Diubah ke ungu
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(12),
@@ -483,7 +483,7 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             elevation: 4,
-                            shadowColor: accentPurple.withOpacity(0.5), // Diubah ke ungu
+                            shadowColor: accentPurple.withValues(alpha: 0.5), // Diubah ke ungu
                           ),
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -559,7 +559,7 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
                         Icon(
                           Icons.camera_alt,
                           size: 80,
-                          color: primaryPurple.withOpacity(0.3), // Diubah ke ungu
+                          color: primaryPurple.withValues(alpha: 0.3), // Diubah ke ungu
                         ),
                         const SizedBox(height: 16),
                         Text(

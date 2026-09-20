@@ -116,10 +116,10 @@ class _DomainOsintPageState extends State<DomainOsintPage> {
       decoration: BoxDecoration(
         color: cardDark,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: accentPurple.withOpacity(0.5), width: 1), // Ubah ke ungu
+        border: Border.all(color: accentPurple.withValues(alpha: 0.5), width: 1), // Ubah ke ungu
         boxShadow: [
           BoxShadow(
-            color: accentPurple.withOpacity(0.2), // Ubah ke ungu
+            color: accentPurple.withValues(alpha: 0.2), // Ubah ke ungu
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -180,7 +180,7 @@ class _DomainOsintPageState extends State<DomainOsintPage> {
       decoration: BoxDecoration(
         color: primaryDark,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: primaryWhite.withOpacity(0.1)),
+        border: Border.all(color: primaryWhite.withValues(alpha: 0.1)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,7 +192,7 @@ class _DomainOsintPageState extends State<DomainOsintPage> {
                 Text(
                   label,
                   style: TextStyle(
-                    color: primaryWhite.withOpacity(0.7),
+                    color: primaryWhite.withValues(alpha: 0.7),
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -343,7 +343,7 @@ class _DomainOsintPageState extends State<DomainOsintPage> {
       Text(
         'Ditemukan ${cleanSubdomains.length} subdomain',
         style: TextStyle(
-          color: primaryWhite.withOpacity(0.7),
+          color: primaryWhite.withValues(alpha: 0.7),
           fontSize: 14,
         ),
       ),
@@ -354,7 +354,7 @@ class _DomainOsintPageState extends State<DomainOsintPage> {
         decoration: BoxDecoration(
           color: primaryDark,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: primaryWhite.withOpacity(0.1)),
+          border: Border.all(color: primaryWhite.withValues(alpha: 0.1)),
         ),
         child: Row(
           children: [
@@ -410,10 +410,10 @@ class _DomainOsintPageState extends State<DomainOsintPage> {
                 decoration: BoxDecoration(
                   color: cardDark,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: accentPurple.withOpacity(0.5)), // Ubah ke ungu
+                  border: Border.all(color: accentPurple.withValues(alpha: 0.5)), // Ubah ke ungu
                   boxShadow: [
                     BoxShadow(
-                      color: accentPurple.withOpacity(0.2), // Ubah ke ungu
+                      color: accentPurple.withValues(alpha: 0.2), // Ubah ke ungu
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -426,11 +426,11 @@ class _DomainOsintPageState extends State<DomainOsintPage> {
                       style: TextStyle(color: primaryWhite, fontSize: 16),
                       decoration: InputDecoration(
                         labelText: 'Masukkan Domain',
-                        labelStyle: TextStyle(color: primaryWhite.withOpacity(0.7)),
+                        labelStyle: TextStyle(color: primaryWhite.withValues(alpha: 0.7)),
                         hintText: 'Contoh: nullxteam.fun',
-                        hintStyle: TextStyle(color: primaryWhite.withOpacity(0.4)),
+                        hintStyle: TextStyle(color: primaryWhite.withValues(alpha: 0.4)),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: accentPurple.withOpacity(0.5)), // Ubah ke ungu
+                          borderSide: BorderSide(color: accentPurple.withValues(alpha: 0.5)), // Ubah ke ungu
                           borderRadius: BorderRadius.circular(12),
                         ),
                         focusedBorder: OutlineInputBorder(

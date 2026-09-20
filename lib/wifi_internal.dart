@@ -90,7 +90,7 @@ class _WifiInternalPageState extends State<WifiInternalPage> {
         backgroundColor: cardDark,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: accentPurple.withOpacity(0.3)), // Ubah ke ungu
+          side: BorderSide(color: accentPurple.withValues(alpha: 0.3)), // Ubah ke ungu
         ),
         title: Text(title,
             style: TextStyle(color: accentPurple, fontFamily: 'Orbitron')), // Ubah ke ungu
@@ -109,11 +109,11 @@ class _WifiInternalPageState extends State<WifiInternalPage> {
   Widget _infoCard(String title, String value, IconData icon) {
     return Card(
       color: cardDark,
-      shadowColor: accentPurple.withOpacity(0.5), // Ubah ke ungu
+      shadowColor: accentPurple.withValues(alpha: 0.5), // Ubah ke ungu
       elevation: 6,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: accentPurple.withOpacity(0.2)), // Ubah ke ungu
+        side: BorderSide(color: accentPurple.withValues(alpha: 0.2)), // Ubah ke ungu
       ),
       child: ListTile(
         leading: Icon(icon, color: accentPurple), // Ubah ke ungu
@@ -206,7 +206,7 @@ class _WifiInternalPageState extends State<WifiInternalPage> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30)),
                       elevation: 10,
-                      shadowColor: accentPurple.withOpacity(0.5), // Ubah shadow ke ungu
+                      shadowColor: accentPurple.withValues(alpha: 0.5), // Ubah shadow ke ungu
                     ),
                   ),
                 ),

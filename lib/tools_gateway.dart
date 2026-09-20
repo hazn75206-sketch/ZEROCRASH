@@ -292,14 +292,14 @@ class ToolsPage extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             _bgCard,
-            _bgCard.withOpacity(0.8),
+            _bgCard.withValues(alpha: 0.8),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _red.withOpacity(0.15)),
+        border: Border.all(color: _red.withValues(alpha: 0.15)),
         boxShadow: [
           BoxShadow(
-            color: _red.withOpacity(0.06),
+            color: _red.withValues(alpha: 0.06),
             blurRadius: 30,
             spreadRadius: 0,
           ),
@@ -313,9 +313,9 @@ class ToolsPage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: _red.withOpacity(0.12),
+                  color: _red.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: _red.withOpacity(0.2)),
+                  border: Border.all(color: _red.withValues(alpha: 0.2)),
                 ),
                 child: Icon(Icons.shield, color: _red, size: 26),
               ),
@@ -349,9 +349,9 @@ class ToolsPage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: _red.withOpacity(0.10),
+                  color: _red.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: _red.withOpacity(0.25)),
+                  border: Border.all(color: _red.withValues(alpha: 0.25)),
                 ),
                 child: Text(
                   userRole.toUpperCase(),
@@ -407,18 +407,18 @@ class ToolsPage extends StatelessWidget {
         decoration: BoxDecoration(
           color: _bgCard,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.12)),
+          border: Border.all(color: color.withValues(alpha: 0.12)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color.withOpacity(0.7), size: 16),
+            Icon(icon, color: color.withValues(alpha: 0.7), size: 16),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
                 label,
                 style: TextStyle(
-                  color: color.withOpacity(0.85),
+                  color: color.withValues(alpha: 0.85),
                   fontSize: 11,
                   fontFamily: 'ShareTechMono',
                   fontWeight: FontWeight.w600,
@@ -443,10 +443,10 @@ class ToolsPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: _bgCard,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _red.withOpacity(0.12)),
+        border: Border.all(color: _red.withValues(alpha: 0.12)),
         boxShadow: [
           BoxShadow(
-            color: _red.withOpacity(0.03),
+            color: _red.withValues(alpha: 0.03),
             blurRadius: 20,
             spreadRadius: 0,
           ),
@@ -461,15 +461,15 @@ class ToolsPage extends StatelessWidget {
         ),
         child: ExpansionTile(
           iconColor: _red,
-          collapsedIconColor: _red.withOpacity(0.4),
+          collapsedIconColor: _red.withValues(alpha: 0.4),
           tilePadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
           childrenPadding: EdgeInsets.zero,
           leading: Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: _red.withOpacity(0.08),
+              color: _red.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: _red.withOpacity(0.15)),
+              border: Border.all(color: _red.withValues(alpha: 0.15)),
             ),
             child: Icon(icon, color: _red, size: 22),
           ),
@@ -518,14 +518,14 @@ class ToolsPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: _bgItem,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _red.withOpacity(0.08)),
+        border: Border.all(color: _red.withValues(alpha: 0.08)),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
-          splashColor: _red.withOpacity(0.08),
-          highlightColor: _red.withOpacity(0.04),
+          splashColor: _red.withValues(alpha: 0.08),
+          highlightColor: _red.withValues(alpha: 0.04),
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
@@ -535,13 +535,13 @@ class ToolsPage extends StatelessWidget {
                   padding: const EdgeInsets.all(7),
                   decoration: BoxDecoration(
                     color: locked
-                        ? _textSubtle.withOpacity(0.3)
-                        : _red.withOpacity(0.08),
+                        ? _textSubtle.withValues(alpha: 0.3)
+                        : _red.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     icon,
-                    color: locked ? _textMuted.withOpacity(0.4) : _red.withOpacity(0.8),
+                    color: locked ? _textMuted.withValues(alpha: 0.4) : _red.withValues(alpha: 0.8),
                     size: 18,
                   ),
                 ),
@@ -550,7 +550,7 @@ class ToolsPage extends StatelessWidget {
                   child: Text(
                     label,
                     style: TextStyle(
-                      color: locked ? _textMuted.withOpacity(0.5) : Colors.white.withOpacity(0.9),
+                      color: locked ? _textMuted.withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.9),
                       fontSize: 13.5,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 0.3,
@@ -564,7 +564,7 @@ class ToolsPage extends StatelessWidget {
                 if (locked)
                   Icon(Icons.lock_outline, color: _textSubtle, size: 14)
                 else
-                  Icon(Icons.arrow_forward_ios, color: _red.withOpacity(0.3), size: 13),
+                  Icon(Icons.arrow_forward_ios, color: _red.withValues(alpha: 0.3), size: 13),
               ],
             ),
           ),
@@ -580,23 +580,23 @@ class ToolsPage extends StatelessWidget {
 
     switch (text.toUpperCase()) {
       case "LIVE":
-        bgColor = Colors.red.withOpacity(0.15);
+        bgColor = Colors.red.withValues(alpha: 0.15);
         textColor = Colors.redAccent;
         break;
       case "NEW":
-        bgColor = _red.withOpacity(0.12);
+        bgColor = _red.withValues(alpha: 0.12);
         textColor = _red;
         break;
       case "VIP":
-        bgColor = Colors.amber.withOpacity(0.12);
+        bgColor = Colors.amber.withValues(alpha: 0.12);
         textColor = Colors.amber;
         break;
       case "18+":
-        bgColor = Colors.pink.withOpacity(0.12);
+        bgColor = Colors.pink.withValues(alpha: 0.12);
         textColor = Colors.pinkAccent;
         break;
       default:
-        bgColor = _red.withOpacity(0.10);
+        bgColor = _red.withValues(alpha: 0.10);
         textColor = _red;
     }
 
@@ -605,7 +605,7 @@ class ToolsPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: textColor.withOpacity(0.2)),
+        border: Border.all(color: textColor.withValues(alpha: 0.2)),
       ),
       child: Text(
         text,
@@ -624,19 +624,19 @@ class ToolsPage extends StatelessWidget {
   void _showComingSoon(BuildContext context) {
     showDialog(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.7),
+      barrierColor: Colors.black.withValues(alpha: 0.7),
       builder: (_) => AlertDialog(
         backgroundColor: _bgCard,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: _red.withOpacity(0.2)),
+          side: BorderSide(color: _red.withValues(alpha: 0.2)),
         ),
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: _red.withOpacity(0.10),
+                color: _red.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(Icons.lock_clock, color: _red, size: 20),
@@ -655,9 +655,9 @@ class ToolsPage extends StatelessWidget {
         actions: [
           Container(
             decoration: BoxDecoration(
-              color: _red.withOpacity(0.10),
+              color: _red.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _red.withOpacity(0.25)),
+              border: Border.all(color: _red.withValues(alpha: 0.25)),
             ),
             child: TextButton(
               onPressed: () => Navigator.pop(context),

@@ -110,7 +110,7 @@ class _WifiKillerPageState extends State<WifiKillerPage> {
         backgroundColor: cardDark,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: accentPurple.withOpacity(0.3)),
+          side: BorderSide(color: accentPurple.withValues(alpha: 0.3)),
         ),
         title: Text(
           title,
@@ -133,9 +133,9 @@ class _WifiKillerPageState extends State<WifiKillerPage> {
           Center(
             child: Container(
               decoration: BoxDecoration(
-                color: primaryPurple.withOpacity(0.2),
+                color: primaryPurple.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: accentPurple.withOpacity(0.3)),
+                border: Border.all(color: accentPurple.withValues(alpha: 0.3)),
               ),
               child: TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -202,10 +202,10 @@ class _WifiKillerPageState extends State<WifiKillerPage> {
               decoration: BoxDecoration(
                 color: cardDark,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: primaryPurple.withOpacity(0.3)),
+                border: Border.all(color: primaryPurple.withValues(alpha: 0.3)),
                 boxShadow: [
                   BoxShadow(
-                    color: primaryPurple.withOpacity(0.1),
+                    color: primaryPurple.withValues(alpha: 0.1),
                     blurRadius: 10,
                     offset: Offset(0, 5),
                   ),
@@ -236,7 +236,7 @@ class _WifiKillerPageState extends State<WifiKillerPage> {
                   borderRadius: BorderRadius.circular(25),
                   boxShadow: [
                     BoxShadow(
-                      color: isKilling ? Colors.transparent : primaryPurple.withOpacity(0.4),
+                      color: isKilling ? Colors.transparent : primaryPurple.withValues(alpha: 0.4),
                       blurRadius: 15,
                       offset: Offset(0, 5),
                     ),

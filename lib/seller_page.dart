@@ -38,8 +38,8 @@ class _SellerPageState extends State<SellerPage> {
   final Color primaryPurple = Colors.grey.shade800;
   final Color accentPurple = Colors.white;
   final Color primaryWhite = Colors.white;
-  final Color cardGlass = Colors.white.withOpacity(0.05);
-  final Color borderGlass = Colors.white.withOpacity(0.1);
+  final Color cardGlass = Colors.white.withValues(alpha: 0.05);
+  final Color borderGlass = Colors.white.withValues(alpha: 0.1);
 
   @override
   void initState() {
@@ -161,7 +161,7 @@ class _SellerPageState extends State<SellerPage> {
         backgroundColor: bgDark,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: accentPurple.withOpacity(0.3)),
+          side: BorderSide(color: accentPurple.withValues(alpha: 0.3)),
         ),
         title: Row(
           children: [
@@ -241,7 +241,7 @@ class _SellerPageState extends State<SellerPage> {
         border: Border.all(color: borderGlass),
         boxShadow: [
           BoxShadow(
-            color: primaryPurple.withOpacity(0.1),
+            color: primaryPurple.withValues(alpha: 0.1),
             blurRadius: 15,
             offset: Offset(0, 5),
           ),
@@ -255,7 +255,7 @@ class _SellerPageState extends State<SellerPage> {
               Container(
                 padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: primaryPurple.withOpacity(0.2),
+                  color: primaryPurple.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: accentPurple),
@@ -294,7 +294,7 @@ class _SellerPageState extends State<SellerPage> {
           Container(
             padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: primaryPurple.withOpacity(0.2),
+              color: primaryPurple.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.person, color: accentPurple),
@@ -353,7 +353,7 @@ class _SellerPageState extends State<SellerPage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [bgDark, primaryPurple.withOpacity(0.1), bgDark],
+            colors: [bgDark, primaryPurple.withValues(alpha: 0.1), bgDark],
           ),
         ),
         child: SafeArea(
@@ -373,7 +373,7 @@ class _SellerPageState extends State<SellerPage> {
                     fontWeight: FontWeight.bold,
                     fontFamily: 'Orbitron',
                     letterSpacing: 2,
-                    shadows: [Shadow(color: primaryPurple.withOpacity(0.8), blurRadius: 10)],
+                    shadows: [Shadow(color: primaryPurple.withValues(alpha: 0.8), blurRadius: 10)],
                   ),
                 ),
                 SizedBox(height: 40),
@@ -407,7 +407,7 @@ class _SellerPageState extends State<SellerPage> {
                         gradient: LinearGradient(colors: [primaryPurple, accentPurple]),
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
-                          BoxShadow(color: primaryPurple.withOpacity(0.4), blurRadius: 10, offset: Offset(0, 4))
+                          BoxShadow(color: primaryPurple.withValues(alpha: 0.4), blurRadius: 10, offset: Offset(0, 4))
                         ],
                       ),
                       child: ElevatedButton(
@@ -450,7 +450,7 @@ class _SellerPageState extends State<SellerPage> {
                         gradient: LinearGradient(colors: [Colors.blue, Colors.lightBlueAccent]),
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
-                          BoxShadow(color: Colors.blue.withOpacity(0.4), blurRadius: 10, offset: Offset(0, 4))
+                          BoxShadow(color: Colors.blue.withValues(alpha: 0.4), blurRadius: 10, offset: Offset(0, 4))
                         ],
                       ),
                       child: ElevatedButton(
@@ -476,7 +476,7 @@ class _SellerPageState extends State<SellerPage> {
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.2),
+                        color: Colors.black.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: borderGlass),
                       ),

@@ -209,7 +209,7 @@ class _LoginPageState extends State<LoginPage>
         backgroundColor: const Color(0xFF0D0503),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: accentOrange.withOpacity(0.3), width: 1),
+          side: BorderSide(color: accentOrange.withValues(alpha: 0.3), width: 1),
         ),
         title: Text(title,
             style: const TextStyle(
@@ -253,7 +253,7 @@ class _LoginPageState extends State<LoginPage>
             border: Border.all(color: borderDim, width: 1),
             boxShadow: [
               BoxShadow(
-                color: accentOrange.withOpacity(0.15),
+                color: accentOrange.withValues(alpha: 0.15),
                 blurRadius: 30,
                 spreadRadius: 4,
               ),
@@ -282,7 +282,7 @@ class _LoginPageState extends State<LoginPage>
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Icon(Icons.close,
-                        color: secondaryText.withOpacity(0.7), size: 20),
+                        color: secondaryText.withValues(alpha: 0.7), size: 20),
                   ),
                 ],
               ),
@@ -290,7 +290,7 @@ class _LoginPageState extends State<LoginPage>
               Text(
                 "Pilih durasi akses DarkVerse",
                 style: TextStyle(
-                    color: secondaryText.withOpacity(0.8), fontSize: 12),
+                    color: secondaryText.withValues(alpha: 0.8), fontSize: 12),
               ),
               const SizedBox(height: 18),
               ...pricingPlans.map((plan) => Container(
@@ -298,7 +298,7 @@ class _LoginPageState extends State<LoginPage>
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 14),
                     decoration: BoxDecoration(
-                      color: bgInput.withOpacity(0.5),
+                      color: bgInput.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: borderInput, width: 1),
                     ),
@@ -401,7 +401,7 @@ class _LoginPageState extends State<LoginPage>
                         border: Border.all(color: borderDim, width: 1),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.5),
+                            color: Colors.black.withValues(alpha: 0.5),
                             blurRadius: 30,
                             offset: const Offset(0, 15),
                           ),
@@ -468,13 +468,13 @@ class _LoginPageState extends State<LoginPage>
                         Container(
                           width: double.infinity,
                           height: 1,
-                          color: accentOrange.withOpacity(0.08),
+                          color: accentOrange.withValues(alpha: 0.08),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           "By continuing, you agree to our Terms of Service",
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             fontSize: 11,
                             letterSpacing: 0.5,
                           ),
@@ -484,7 +484,7 @@ class _LoginPageState extends State<LoginPage>
                         Text(
                           "v7.5",
                           style: TextStyle(
-                            color: accentOrange.withOpacity(0.25),
+                            color: accentOrange.withValues(alpha: 0.25),
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 2,
@@ -518,7 +518,7 @@ class _LoginPageState extends State<LoginPage>
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: accentOrange.withOpacity(0.4),
+            color: accentOrange.withValues(alpha: 0.4),
             blurRadius: 25,
             offset: const Offset(0, 10),
           ),
@@ -535,7 +535,7 @@ class _LoginPageState extends State<LoginPage>
                 Text(
                   "DARKVERSE",
                   style: TextStyle(
-                    color: Colors.black.withOpacity(0.85),
+                    color: Colors.black.withValues(alpha: 0.85),
                     fontWeight: FontWeight.w900,
                     fontSize: 18,
                     letterSpacing: 1,
@@ -544,7 +544,7 @@ class _LoginPageState extends State<LoginPage>
                 Text(
                   "Secure Access to DarkVerse",
                   style: TextStyle(
-                    color: Colors.black.withOpacity(0.6),
+                    color: Colors.black.withValues(alpha: 0.6),
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
                   ),
@@ -553,7 +553,7 @@ class _LoginPageState extends State<LoginPage>
             ),
           ),
           Icon(Icons.qr_code_2_rounded,
-              color: Colors.black.withOpacity(0.7), size: 26),
+              color: Colors.black.withValues(alpha: 0.7), size: 26),
         ],
       ),
     );
@@ -567,7 +567,7 @@ class _LoginPageState extends State<LoginPage>
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: Colors.black,
-        border: Border.all(color: Colors.black.withOpacity(0.3), width: 2),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.3), width: 2),
       ),
       clipBehavior: Clip.antiAlias,
       child: Image.asset(
@@ -595,7 +595,7 @@ class _LoginPageState extends State<LoginPage>
             border: Border.all(color: accentOrange, width: 2),
             boxShadow: [
               BoxShadow(
-                color: accentOrange.withOpacity(0.4),
+                color: accentOrange.withValues(alpha: 0.4),
                 blurRadius: 16,
                 spreadRadius: 1,
               ),
@@ -622,10 +622,10 @@ class _LoginPageState extends State<LoginPage>
                 padding: const EdgeInsets.symmetric(
                     horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: accentOrange.withOpacity(0.12),
+                  color: accentOrange.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                   border:
-                      Border.all(color: accentOrange.withOpacity(0.4)),
+                      Border.all(color: accentOrange.withValues(alpha: 0.4)),
                 ),
                 child: const Text(
                   "Secure Access to DarkVerse",
@@ -654,12 +654,12 @@ class _LoginPageState extends State<LoginPage>
                   ),
                   const SizedBox(width: 12),
                   Icon(Icons.shield_outlined,
-                      size: 12, color: secondaryText.withOpacity(0.8)),
+                      size: 12, color: secondaryText.withValues(alpha: 0.8)),
                   const SizedBox(width: 4),
                   Text(
                     "Secure Access",
                     style: TextStyle(
-                        color: secondaryText.withOpacity(0.8), fontSize: 11),
+                        color: secondaryText.withValues(alpha: 0.8), fontSize: 11),
                   ),
                 ],
               ),
@@ -702,7 +702,7 @@ class _LoginPageState extends State<LoginPage>
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(
-            color: Colors.white.withOpacity(0.35),
+            color: Colors.white.withValues(alpha: 0.35),
             fontSize: 14,
           ),
           prefixIcon: Icon(icon, color: secondaryText, size: 20),
@@ -735,13 +735,13 @@ class _LoginPageState extends State<LoginPage>
               ? []
               : [
                   BoxShadow(
-                    color: accentOrange.withOpacity(0.35),
+                    color: accentOrange.withValues(alpha: 0.35),
                     blurRadius: 25,
                     spreadRadius: 2,
                     offset: const Offset(0, 8),
                   ),
                   BoxShadow(
-                    color: accentOrange.withOpacity(0.15),
+                    color: accentOrange.withValues(alpha: 0.15),
                     blurRadius: 50,
                     spreadRadius: 10,
                   ),
@@ -760,7 +760,7 @@ class _LoginPageState extends State<LoginPage>
                       child: CircularProgressIndicator(
                         strokeWidth: 2.5,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white.withOpacity(0.8)),
+                            Colors.white.withValues(alpha: 0.8)),
                       ),
                     )
                   : Row(
@@ -795,8 +795,8 @@ class _LoginPageState extends State<LoginPage>
       child: OutlinedButton(
         onPressed: _showPricingPlan,
         style: OutlinedButton.styleFrom(
-          backgroundColor: bgInput.withOpacity(0.3),
-          side: BorderSide(color: accentOrange.withOpacity(0.5), width: 1),
+          backgroundColor: bgInput.withValues(alpha: 0.3),
+          side: BorderSide(color: accentOrange.withValues(alpha: 0.5), width: 1),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -840,7 +840,7 @@ class _LoginPageState extends State<LoginPage>
                 border: Border.all(color: color, width: 1.5),
                 boxShadow: [
                   BoxShadow(
-                    color: color.withOpacity(0.3),
+                    color: color.withValues(alpha: 0.3),
                     blurRadius: 12,
                     spreadRadius: 1,
                   ),
@@ -852,7 +852,7 @@ class _LoginPageState extends State<LoginPage>
           const SizedBox(height: 6),
           Text(
             label,
-            style: TextStyle(color: secondaryText.withOpacity(0.9), fontSize: 11),
+            style: TextStyle(color: secondaryText.withValues(alpha: 0.9), fontSize: 11),
           ),
         ],
       );
@@ -863,7 +863,7 @@ class _LoginPageState extends State<LoginPage>
         Container(
           width: double.infinity,
           height: 1,
-          color: accentOrange.withOpacity(0.08),
+          color: accentOrange.withValues(alpha: 0.08),
         ),
         const SizedBox(height: 16),
         Row(
@@ -916,15 +916,15 @@ class _OrangeGlowPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint1 = Paint()
-      ..color = const Color(0xFFFF9500).withOpacity(0.08 * animValue)
+      ..color = const Color(0xFFFF9500).withValues(alpha: 0.08 * animValue)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 80);
 
     final paint2 = Paint()
-      ..color = const Color(0xFFCC6A00).withOpacity(0.06 * animValue)
+      ..color = const Color(0xFFCC6A00).withValues(alpha: 0.06 * animValue)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 100);
 
     final paint3 = Paint()
-      ..color = const Color(0xFFFFB347).withOpacity(0.04 * animValue)
+      ..color = const Color(0xFFFFB347).withValues(alpha: 0.04 * animValue)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 60);
 
     canvas.drawCircle(

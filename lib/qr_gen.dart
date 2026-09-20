@@ -122,10 +122,10 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
                 decoration: BoxDecoration(
                   color: cardDark,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: primaryPurple.withOpacity(0.3)),
+                  border: Border.all(color: primaryPurple.withValues(alpha: 0.3)),
                   boxShadow: [
                     BoxShadow(
-                      color: primaryPurple.withOpacity(0.2),
+                      color: primaryPurple.withValues(alpha: 0.2),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -142,7 +142,7 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
                         hintText: 'Contoh: https://google.com',
                         hintStyle: TextStyle(color: textGrey),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: primaryPurple.withOpacity(0.5)),
+                          borderSide: BorderSide(color: primaryPurple.withValues(alpha: 0.5)),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -150,7 +150,7 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         filled: true,
-                        fillColor: const Color(0xFF00050B).withOpacity(0.3),
+                        fillColor: const Color(0xFF00050B).withValues(alpha: 0.3),
                         suffixIcon: _isLoading
                             ? Padding(
                           padding: const EdgeInsets.all(12.0),
@@ -180,7 +180,7 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 4,
-                          shadowColor: primaryPurple.withOpacity(0.5),
+                          shadowColor: primaryPurple.withValues(alpha: 0.5),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -211,9 +211,9 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: primaryPurple.withOpacity(0.1),
+                    color: primaryPurple.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: primaryPurple.withOpacity(0.3)),
+                    border: Border.all(color: primaryPurple.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [
@@ -242,10 +242,10 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
                           decoration: BoxDecoration(
                             color: cardDark,
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: primaryPurple.withOpacity(0.3)),
+                            border: Border.all(color: primaryPurple.withValues(alpha: 0.3)),
                             boxShadow: [
                               BoxShadow(
-                                color: primaryPurple.withOpacity(0.2),
+                                color: primaryPurple.withValues(alpha: 0.2),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -259,7 +259,7 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
                                 decoration: BoxDecoration(
                                   color: primaryWhite,
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: primaryPurple.withOpacity(0.5), width: 2),
+                                  border: Border.all(color: primaryPurple.withValues(alpha: 0.5), width: 2),
                                 ),
                                 child: Image.memory(_qrImage!),
                               ),
@@ -276,7 +276,7 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     elevation: 4,
-                                    shadowColor: accentPurple.withOpacity(0.5),
+                                    shadowColor: accentPurple.withValues(alpha: 0.5),
                                   ),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -301,9 +301,9 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
                               Container(
                                 padding: EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: primaryPurple.withOpacity(0.1),
+                                  color: primaryPurple.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: primaryPurple.withOpacity(0.2)),
+                                  border: Border.all(color: primaryPurple.withValues(alpha: 0.2)),
                                 ),
                                 child: Row(
                                   children: [
@@ -340,7 +340,7 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
                         Icon(
                           Icons.qr_code_scanner,
                           size: 80,
-                          color: primaryPurple.withOpacity(0.3),
+                          color: primaryPurple.withValues(alpha: 0.3),
                         ),
                         SizedBox(height: 16),
                         Text(
