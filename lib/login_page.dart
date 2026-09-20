@@ -4,8 +4,11 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'video_splash_page.dart';
 
+// Firebase Auth+Firestore - Vercel baseUrl deprecated, use Firebase
 const String baseUrl = "https://private-server.banditflow.my.id:2014";
 
 class LoginPage extends StatefulWidget {
@@ -116,19 +119,33 @@ class _LoginPageState extends State<LoginPage>
 
   Future<void> initLogin() async {
     androidId = await getAndroidId();
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+        if (doc.exists) {
+          final data = doc.data()!;
+          final prefs = await SharedPreferences.getInstance();
+          final savedUser = prefs.getString("username") ?? data['username'] ?? user.email!.split('@')[0];
+          final savedPass = prefs.getString("password") ?? '';
+          if (!mounted) return;
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SplashScreen(username: savedUser, password: savedPass, role: data['role'], sessionKey: data['key'] ?? user.uid, expiredDate: data['expiredDate'], listBug: [], listDoos: [], news: [])));
+          return;
+        }
+      } catch (_) {}
+    }
     final prefs = await SharedPreferences.getInstance();
     final savedUser = prefs.getString("username");
     final savedPass = prefs.getString("password");
     final savedKey = prefs.getString("key");
-
     if (savedUser != null && savedPass != null && savedKey != null) {
-      final uri = Uri.parse(
-          "$baseUrl/myInfo?username=$savedUser&password=$savedPass&androidId=$androidId&key=$savedKey");
       try {
-        final res = await http.get(uri);
+        final uri = Uri.parse("$baseUrl/myInfo?username=$savedUser&password=$savedPass&androidId=$androidId&key=$savedKey");
+        final res = await http.get(uri).timeout(const Duration(seconds: 5));
         final data = jsonDecode(res.body);
         if (data['valid'] == true) {
-          _navigateToVideoSplash(_buildArgs(data, savedUser, savedPass));
+          if (!mounted) return;
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SplashScreen(username: savedUser, password: savedPass, role: data['role'], sessionKey: data['key'], expiredDate: data['expiredDate'], listBug: (data['listBug'] as List? ?? []).map((e) => Map<String, dynamic>.from(e as Map)).toList(), listDoos: [], news: (data['news'] as List? ?? []).map((e) => Map<String, dynamic>.from(e as Map)).toList())));
         }
       } catch (_) {}
     }
@@ -142,58 +159,58 @@ class _LoginPageState extends State<LoginPage>
 
   Future<void> login() async {
     if (!_formKey.currentState!.validate()) return;
-
     final username = userController.text.trim();
     final password = passController.text.trim();
     setState(() => isLoading = true);
-
     try {
-      final validate = await http.post(
-        Uri.parse("$baseUrl/validate"),
-        body: {
-          "username": username,
-          "password": password,
-          "androidId": androidId ?? "unknown_device",
-        },
-      );
-      final validData = jsonDecode(validate.body);
-
-      if (validData['expired'] == true) {
-        _showPopup(
-          title: "Access Expired",
-          message: "Masa akses Anda telah habis.\nSilakan perpanjang akses.",
-          showContact: true,
-        );
-      } else if (validData['valid'] != true) {
-        final String errorMsg = (validData['message'] ?? "").toLowerCase();
-        if (errorMsg.contains("perangkat") ||
-            errorMsg.contains("device") ||
-            errorMsg.contains("another")) {
-          _showPopup(
-            title: "Sesi Aktif",
-            message:
-                "Akun ini sedang login di perangkat lain.\nSilakan logout di perangkat lama.",
-          );
-        } else {
-          _showPopup(
-            title: "Login Gagal",
-            message: "Username atau password salah.",
-          );
-        }
-      } else {
-        final prefs = await SharedPreferences.getInstance();
-        prefs.setString("username", username);
-        prefs.setString("password", password);
-        prefs.setString("key", validData['key']);
-        _navigateToVideoSplash(_buildArgs(validData, username, password));
+      final email = username.contains('@') ? username : '${username.toLowerCase()}@zerocrash.app';
+      final cred = await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
+      final uid = cred.user!.uid;
+      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (!doc.exists) throw Exception('User data not found');
+      final data = doc.data()!;
+      final role = data['role'] ?? 'member';
+      final expiredDate = data['expiredDate'] ?? '2027-12-31';
+      final key = data['key'] ?? uid;
+      if (DateTime.tryParse(expiredDate)?.isBefore(DateTime.now()) ?? false) {
+        _showPopup(title: "⏳ Access Expired", message: "Your access has expired.
+Please renew it.", color: Colors.amber, showContact: true);
+        setState(() => isLoading = false);
+        return;
       }
+      final bugsSnap = await FirebaseFirestore.instance.collection('bugs').get().catchError((_) => null);
+      final newsSnap = await FirebaseFirestore.instance.collection('news').get().catchError((_) => null);
+      final listBug = bugsSnap != null ? bugsSnap.docs.map((d) => d.data()).toList() : [{'bug_id': 'delay', 'bug_name': 'DELAY CRASH'}];
+      final news = newsSnap != null ? newsSnap.docs.map((d) => d.data()).toList() : [{'title': 'Welcome', 'content': 'Zero DarkVerse'}];
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString("username", username);
+      prefs.setString("password", password);
+      prefs.setString("key", key);
+      if (!mounted) return;
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SplashScreen(username: username, password: password, role: role, sessionKey: key, expiredDate: expiredDate, listBug: (listBug as List).map((e) => Map<String, dynamic>.from(e as Map)).toList(), listDoos: [], news: (news as List).map((e) => Map<String, dynamic>.from(e as Map)).toList())));
+    } on FirebaseAuthException catch (e) {
+      String msg = "Invalid username or password.";
+      if (e.code == 'user-not-found' || e.code == 'wrong-password' || e.code == 'invalid-credential') msg = "Invalid username or password.";
+      else if (e.code == 'too-many-requests') msg = "Too many attempts. Try later.";
+      else msg = e.message ?? msg;
+      _showPopup(title: "❌ Login Failed", message: msg, color: Colors.redAccent);
     } catch (e) {
-      _showPopup(
-        title: "Connection Error",
-        message: "Gagal terhubung ke server.",
-      );
+      try {
+        final validate = await http.post(Uri.parse("$baseUrl/validate"), body: {"username": username, "password": password, "androidId": androidId ?? "unknown_device"}).timeout(const Duration(seconds: 5));
+        final validData = jsonDecode(validate.body);
+        if (validData['valid'] == true) {
+          final prefs = await SharedPreferences.getInstance();
+          prefs.setString("username", username);
+          prefs.setString("password", password);
+          prefs.setString("key", validData['key']);
+          if (!mounted) return;
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SplashScreen(username: username, password: password, role: validData['role'], sessionKey: validData['key'], expiredDate: validData['expiredDate'], listBug: (validData['listBug'] as List? ?? []).map((e) => Map<String, dynamic>.from(e as Map)).toList(), listDoos: [], news: (validData['news'] as List? ?? []).map((e) => Map<String, dynamic>.from(e as Map)).toList())));
+          setState(() => isLoading = false);
+          return;
+        }
+      } catch (_) {}
+      _showPopup(title: "⚠️ Login Error", message: "Firebase: $e", color: Color(0xFF8B0000));
     }
-
     setState(() => isLoading = false);
   }
 

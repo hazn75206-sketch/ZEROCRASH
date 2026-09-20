@@ -27,6 +27,9 @@ dependencies:
   chewie: ^1.5.2
   shimmer: ^3.0.0
   webview_flutter: ^4.13.1
+  firebase_core: ^2.32.0
+  firebase_auth: ^4.20.0
+  cloud_firestore: ^4.17.0
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1 # versi terbaru saat ini

@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "895687496893",
+    "firebase_url": "https://apkbugnexus-367cf-default-rtdb.firebaseio.com",
+    "project_id": "apkbugnexus-367cf",
+    "storage_bucket": "apkbugnexus-367cf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:895687496893:android:8625b7c17cf20c793c53d4",
+        "android_client_info": {
+          "package_name": "com.fahri.darkverse"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcy_u9LOn1OMsSmhtKFUO1sJ2yXHFBPDw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
