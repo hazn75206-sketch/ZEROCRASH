@@ -129,7 +129,7 @@ class _LoginPageState extends State<LoginPage>
           final savedUser = prefs.getString("username") ?? data['username'] ?? user.email!.split('@')[0];
           final savedPass = prefs.getString("password") ?? '';
           if (!mounted) return;
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SplashScreen(username: savedUser, password: savedPass, role: data['role'], sessionKey: data['key'] ?? user.uid, expiredDate: data['expiredDate'], listBug: [], listDoos: [], news: [])));
+          _navigateToVideoSplash({"username": savedUser, "password": savedPass, "role": data['role'], "key": data['key'] ?? user.uid, "expiredDate": data['expiredDate'], "listBug": [], "listDDoS": [], "news": []});
           return;
         }
       } catch (_) {}
@@ -145,7 +145,7 @@ class _LoginPageState extends State<LoginPage>
         final data = jsonDecode(res.body);
         if (data['valid'] == true) {
           if (!mounted) return;
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SplashScreen(username: savedUser, password: savedPass, role: data['role'], sessionKey: data['key'], expiredDate: data['expiredDate'], listBug: (data['listBug'] as List? ?? []).map((e) => Map<String, dynamic>.from(e as Map)).toList(), listDoos: [], news: (data['news'] as List? ?? []).map((e) => Map<String, dynamic>.from(e as Map)).toList())));
+          _navigateToVideoSplash(_buildArgs(data, savedUser, savedPass));
         }
       } catch (_) {}
     }
@@ -173,8 +173,7 @@ class _LoginPageState extends State<LoginPage>
       final expiredDate = data['expiredDate'] ?? '2027-12-31';
       final key = data['key'] ?? uid;
       if (DateTime.tryParse(expiredDate)?.isBefore(DateTime.now()) ?? false) {
-        _showPopup(title: "⏳ Access Expired", message: "Your access has expired.
-Please renew it.", color: Colors.amber, showContact: true);
+        _showPopup(title: "⏳ Access Expired", message: "Your access has expired.\nPlease renew it.", showContact: true);
         setState(() => isLoading = false);
         return;
       }
@@ -187,13 +186,13 @@ Please renew it.", color: Colors.amber, showContact: true);
       prefs.setString("password", password);
       prefs.setString("key", key);
       if (!mounted) return;
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SplashScreen(username: username, password: password, role: role, sessionKey: key, expiredDate: expiredDate, listBug: (listBug as List).map((e) => Map<String, dynamic>.from(e as Map)).toList(), listDoos: [], news: (news as List).map((e) => Map<String, dynamic>.from(e as Map)).toList())));
+      _navigateToVideoSplash({"username": username, "password": password, "role": role, "key": key, "expiredDate": expiredDate, "listBug": (listBug as List).map((e) => Map<String, dynamic>.from(e as Map)).toList(), "listDDoS": [], "news": (news as List).map((e) => Map<String, dynamic>.from(e as Map)).toList()});
     } on FirebaseAuthException catch (e) {
       String msg = "Invalid username or password.";
       if (e.code == 'user-not-found' || e.code == 'wrong-password' || e.code == 'invalid-credential') msg = "Invalid username or password.";
       else if (e.code == 'too-many-requests') msg = "Too many attempts. Try later.";
       else msg = e.message ?? msg;
-      _showPopup(title: "❌ Login Failed", message: msg, color: Colors.redAccent);
+      _showPopup(title: "❌ Login Failed", message: msg);
     } catch (e) {
       try {
         final validate = await http.post(Uri.parse("$baseUrl/validate"), body: {"username": username, "password": password, "androidId": androidId ?? "unknown_device"}).timeout(const Duration(seconds: 5));
@@ -204,12 +203,12 @@ Please renew it.", color: Colors.amber, showContact: true);
           prefs.setString("password", password);
           prefs.setString("key", validData['key']);
           if (!mounted) return;
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SplashScreen(username: username, password: password, role: validData['role'], sessionKey: validData['key'], expiredDate: validData['expiredDate'], listBug: (validData['listBug'] as List? ?? []).map((e) => Map<String, dynamic>.from(e as Map)).toList(), listDoos: [], news: (validData['news'] as List? ?? []).map((e) => Map<String, dynamic>.from(e as Map)).toList())));
+          _navigateToVideoSplash(_buildArgs(validData, username, password));
           setState(() => isLoading = false);
           return;
         }
       } catch (_) {}
-      _showPopup(title: "⚠️ Login Error", message: "Firebase: $e", color: Color(0xFF8B0000));
+      _showPopup(title: "⚠️ Login Error", message: "Firebase: $e");
     }
     setState(() => isLoading = false);
   }
