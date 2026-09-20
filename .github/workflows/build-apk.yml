@@ -33,7 +33,7 @@ jobs:
           restore-keys: pub-${{ runner.os }}-
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v4
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.35.4'
           channel: stable
