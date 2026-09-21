@@ -102,7 +102,7 @@ class _InfoPageState extends State<InfoPage> with TickerProviderStateMixin {
     try {
       await http
           .get(Uri.parse(
-              'http://private02.angkasanyabobo.my.id:1315/getServerInfo?key=${widget.sessionKey}'))
+              'http://168.144.131.46:20854/getServerInfo?key=${widget.sessionKey}'))
           .timeout(const Duration(seconds: 5));
       if (mounted) setState(() => isLoading = false);
     } catch (_) {
@@ -120,7 +120,7 @@ class _InfoPageState extends State<InfoPage> with TickerProviderStateMixin {
     try {
       final res = await http
           .get(Uri.parse(
-              'http://private02.angkasanyabobo.my.id:1315/ping?key=${widget.sessionKey}'))
+              'http://168.144.131.46:20854/ping?key=${widget.sessionKey}'))
           .timeout(const Duration(seconds: 3));
       final duration = DateTime.now().difference(start).inMilliseconds;
 

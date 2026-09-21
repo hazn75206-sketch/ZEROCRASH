@@ -119,21 +119,7 @@ class _LoginPageState extends State<LoginPage>
 
   Future<void> initLogin() async {
     androidId = await getAndroidId();
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-        if (doc.exists) {
-          final data = doc.data()!;
-          final prefs = await SharedPreferences.getInstance();
-          final savedUser = prefs.getString("username") ?? data['username'] ?? user.email!.split('@')[0];
-          final savedPass = prefs.getString("password") ?? '';
-          if (!mounted) return;
-          _navigateToVideoSplash({"username": savedUser, "password": savedPass, "role": data['role'], "key": data['key'] ?? user.uid, "expiredDate": data['expiredDate'], "listBug": [], "listDDoS": [], "news": []});
-          return;
-        }
-      } catch (_) {}
-    }
+    // Full Petro: only check SharedPreferences + Petro myInfo, no Firebase
     final prefs = await SharedPreferences.getInstance();
     final savedUser = prefs.getString("username");
     final savedPass = prefs.getString("password");
@@ -163,52 +149,33 @@ class _LoginPageState extends State<LoginPage>
     final password = passController.text.trim();
     setState(() => isLoading = true);
     try {
-      final email = username.contains('@') ? username : '${username.toLowerCase()}@zerocrash.app';
-      final cred = await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
-      final uid = cred.user!.uid;
-      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
-      if (!doc.exists) throw Exception('User data not found');
-      final data = doc.data()!;
-      final role = data['role'] ?? 'member';
-      final expiredDate = data['expiredDate'] ?? '2027-12-31';
-      final key = data['key'] ?? uid;
-      if (DateTime.tryParse(expiredDate)?.isBefore(DateTime.now()) ?? false) {
-        _showPopup(title: "⏳ Access Expired", message: "Your access has expired.\nPlease renew it.", showContact: true);
-        setState(() => isLoading = false);
-        return;
-      }
-      final bugsSnap = await FirebaseFirestore.instance.collection('bugs').get().catchError((_) => null);
-      final newsSnap = await FirebaseFirestore.instance.collection('news').get().catchError((_) => null);
-      final listBug = bugsSnap != null ? bugsSnap.docs.map((d) => d.data()).toList() : [{'bug_id': 'delay', 'bug_name': 'DELAY CRASH'}];
-      final news = newsSnap != null ? newsSnap.docs.map((d) => d.data()).toList() : [{'title': 'Welcome', 'content': 'Zero DarkVerse'}];
-      final prefs = await SharedPreferences.getInstance();
-      prefs.setString("username", username);
-      prefs.setString("password", password);
-      prefs.setString("key", key);
-      if (!mounted) return;
-      _navigateToVideoSplash({"username": username, "password": password, "role": role, "key": key, "expiredDate": expiredDate, "listBug": (listBug as List).map((e) => Map<String, dynamic>.from(e as Map)).toList(), "listDDoS": [], "news": (news as List).map((e) => Map<String, dynamic>.from(e as Map)).toList()});
-    } on FirebaseAuthException catch (e) {
-      String msg = "Invalid username or password.";
-      if (e.code == 'user-not-found' || e.code == 'wrong-password' || e.code == 'invalid-credential') msg = "Invalid username or password.";
-      else if (e.code == 'too-many-requests') msg = "Too many attempts. Try later.";
-      else msg = e.message ?? msg;
-      _showPopup(title: "❌ Login Failed", message: msg);
-    } catch (e) {
-      try {
-        final validate = await http.post(Uri.parse("$baseUrl/validate"), body: {"username": username, "password": password, "androidId": androidId ?? "unknown_device"}).timeout(const Duration(seconds: 5));
-        final validData = jsonDecode(validate.body);
-        if (validData['valid'] == true) {
-          final prefs = await SharedPreferences.getInstance();
-          prefs.setString("username", username);
-          prefs.setString("password", password);
-          prefs.setString("key", validData['key']);
-          if (!mounted) return;
-          _navigateToVideoSplash(_buildArgs(validData, username, password));
+      // Full Petro: only Petro validate, no Firebase
+      final validate = await http.post(Uri.parse("$baseUrl/validate"), body: {"username": username, "password": password, "androidId": androidId ?? "unknown_device"}).timeout(const Duration(seconds: 5));
+      final validData = jsonDecode(validate.body);
+      if (validData['valid'] == true) {
+        if (validData['expired'] == true) {
+          _showPopup(title: "⏳ Access Expired", message: "Your access has expired.\nPlease renew it.", showContact: true);
           setState(() => isLoading = false);
           return;
         }
-      } catch (_) {}
-      _showPopup(title: "⚠️ Login Error", message: "Firebase: $e");
+        if (validData['deviceMismatch'] == true) {
+          _showPopup(title: "❌ Login Failed", message: "Account is bound to another device.");
+          setState(() => isLoading = false);
+          return;
+        }
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setString("username", username);
+        prefs.setString("password", password);
+        prefs.setString("key", validData['key']);
+        if (!mounted) return;
+        _navigateToVideoSplash(_buildArgs(validData, username, password));
+      } else {
+        String msg = validData['message'] ?? "Invalid username or password.";
+        if (validData['expired'] == true) msg = "Access expired.";
+        _showPopup(title: "❌ Login Failed", message: msg);
+      }
+    } catch (e) {
+      _showPopup(title: "⚠️ Login Error", message: "Petro offline: $e");
     }
     setState(() => isLoading = false);
   }

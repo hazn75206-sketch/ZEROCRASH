@@ -22,9 +22,9 @@ class _OwnerPageState extends State<OwnerPage> {
   List<dynamic> fullUserList = [];
   List<dynamic> filteredList = [];
 
-  // Role Options untuk Owner: Moderator, Partner, Admin, Reseller, VIP, Member
-  final List<String> roleOptions = ['moderator', 'partner', 'admin', 'reseller', 'vip', 'member'];
-  String selectedRole = 'member'; 
+  // Role Options untuk Owner: All + Moderator, Partner, Admin, Reseller, VIP, Member
+  final List<String> roleOptions = ['all', 'moderator', 'partner', 'admin', 'reseller', 'vip', 'member'];
+  String selectedRole = 'all'; 
 
   int currentPage = 1;
   int itemsPerPage = 25;
@@ -78,9 +78,13 @@ class _OwnerPageState extends State<OwnerPage> {
   void _filterAndPaginate() {
     setState(() {
       currentPage = 1;
-      filteredList = fullUserList
-          .where((u) => u['role'] == selectedRole)
-          .toList();
+      if (selectedRole == 'all') {
+        filteredList = List.from(fullUserList);
+      } else {
+        filteredList = fullUserList
+            .where((u) => u['role'] == selectedRole)
+            .toList();
+      }
     });
   }
 
