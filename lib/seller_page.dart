@@ -51,7 +51,7 @@ class _SellerPageState extends State<SellerPage> {
     setState(() => isLoading = true);
     try {
       final res = await http.get(
-        Uri.parse('https://private-server.banditflow.my.id:2014/listUsers?key=${widget.keyToken}'),
+        Uri.parse('http://168.144.131.46:20854/listUsers?key=${widget.keyToken}'),
       );
       final data = jsonDecode(res.body);
       if (data['valid'] == true && data['authorized'] == true) {
@@ -100,7 +100,7 @@ class _SellerPageState extends State<SellerPage> {
     setState(() => isLoading = true);
     try {
       final res = await http.get(Uri.parse(
-          "https://private-server.banditflow.my.id:2014/createAccount?key=${widget.keyToken}&newUser=$u&pass=$p&day=$d"));
+          "http://168.144.131.46:20854/createAccount?key=${widget.keyToken}&newUser=$u&pass=$p&day=$d"));
       final data = jsonDecode(res.body);
 
       if (data['created'] == true) {
@@ -136,7 +136,7 @@ class _SellerPageState extends State<SellerPage> {
     setState(() => isLoading = true);
     try {
       final res = await http.get(Uri.parse(
-          "https://private-server.banditflow.my.id:2014/editUser?key=${widget.keyToken}&username=$u&addDays=$d"));
+          "http://168.144.131.46:20854/editUser?key=${widget.keyToken}&username=$u&addDays=$d"));
       final data = jsonDecode(res.body);
 
       if (data['edited'] == true) {

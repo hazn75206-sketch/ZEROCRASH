@@ -39,7 +39,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
   }
 
   Future<void> _loadActivities() async {
-    const baseUrl = "https://private-server.banditflow.my.id:2014";
+    const baseUrl = "http://168.144.131.46:20854";
 
     try {
       final response = await http.get(

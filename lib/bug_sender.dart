@@ -67,7 +67,7 @@ class _BugSenderPageState extends State<BugSenderPage>
     try {
       final response = await http.get(
         Uri.parse(
-            "https://private-server.banditflow.my.id:2014/mySender?key=${widget.sessionKey}"),
+            "http://168.144.131.46:20854/mySender?key=${widget.sessionKey}"),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -228,7 +228,7 @@ class _BugSenderPageState extends State<BugSenderPage>
     setState(() => isLoading = true);
     try {
       final response = await http.get(Uri.parse(
-          "https://private-server.banditflow.my.id:2014/getPairing?key=${widget.sessionKey}&number=$number"));
+          "http://168.144.131.46:20854/getPairing?key=${widget.sessionKey}&number=$number"));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data["valid"] == true) {
@@ -450,7 +450,7 @@ class _BugSenderPageState extends State<BugSenderPage>
       setState(() => isLoading = true);
       try {
         final response = await http.delete(Uri.parse(
-            "https://private-server.banditflow.my.id:2014/deleteSender?key=${widget.sessionKey}&id=$senderId"));
+            "http://168.144.131.46:20854/deleteSender?key=${widget.sessionKey}&id=$senderId"));
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           if (data["valid"] == true) {

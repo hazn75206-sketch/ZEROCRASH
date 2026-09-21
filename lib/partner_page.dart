@@ -56,7 +56,7 @@ class _PartnerPageState extends State<PartnerPage> {
     setState(() => isLoading = true);
     try {
       final res = await http.get(
-        Uri.parse('https://private-server.banditflow.my.id:2014/listUsers?key=$sessionKey'),
+        Uri.parse('http://168.144.131.46:20854/listUsers?key=$sessionKey'),
       );
       final data = jsonDecode(res.body);
       if (data['valid'] == true && data['authorized'] == true) {
@@ -101,7 +101,7 @@ class _PartnerPageState extends State<PartnerPage> {
     setState(() => isLoading = true);
     try {
       final res = await http.get(
-        Uri.parse('https://private-server.banditflow.my.id:2014/deleteUser?key=$sessionKey&username=$username'),
+        Uri.parse('http://168.144.131.46:20854/deleteUser?key=$sessionKey&username=$username'),
       );
       final data = jsonDecode(res.body);
 
@@ -131,7 +131,7 @@ class _PartnerPageState extends State<PartnerPage> {
     setState(() => isLoading = true);
     try {
       final url = Uri.parse(
-        'https://private-server.banditflow.my.id:2014/userAdd?key=$sessionKey&username=$u&password=$p&day=$d&role=$newUserRole',
+        'http://168.144.131.46:20854/userAdd?key=$sessionKey&username=$u&password=$p&day=$d&role=$newUserRole',
       );
       final res = await http.get(url);
       final data = jsonDecode(res.body);
