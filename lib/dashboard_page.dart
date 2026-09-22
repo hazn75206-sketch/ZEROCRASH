@@ -191,10 +191,7 @@ class _DashboardPageState extends State<DashboardPage>
     if (index == 1) { _showWhatsAppMenu(); return; }
     setState(() {
       _bottomNavIndex = index;
-      if (index == 0) { _selectedPage = _buildNewsPage(); }
-      else if (index == 2) _selectedPage = InfoPage(sessionKey: sessionKey);
-      // ✅ FIX: Hapus parameter username karena ToolsPage tidak menerimanya
-      else if (index == 3) _selectedPage = ToolsPage(sessionKey: sessionKey, userRole: role, listDoos: listDoos);
+      if (index == 0) { _selectedPage = _buildNewsPage(); } else if (index == 2) { _selectedPage = InfoPage(sessionKey: sessionKey); } else if (index == 3) { _selectedPage = ToolsPage(sessionKey: sessionKey, userRole: role, listDoos: listDoos); }
     });
   }
 
