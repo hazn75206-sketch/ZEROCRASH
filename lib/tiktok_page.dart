@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:gallery_saver/gallery_saver.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
@@ -128,29 +129,53 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
         }).catchError((e) {
           if (!mounted) return;
           setState(() {
-            _errorMessage = "Video tidak bisa diputar langsung. Gunakan SHARE VIDEO untuk unduh & putar offline.";
+            _errorMessage = "Video tidak bisa diputar langsung. Gunakan UNDUH untuk simpan & putar offline.";
           });
         });
     }
   }
 
-  Future<void> _shareVideo() async {
-    if (_videoData?['urls'] == null || _videoData!['urls'].isEmpty) return;
+  bool _isDownloading = false;
 
+  Future<bool> _ensureStoragePerm() async {
+    if (await Permission.storage.isGranted) return true;
+    if ((await Permission.storage.request()).isGranted) return true;
+    final v = await Permission.videos.request();
+    final p = await Permission.photos.request();
+    return v.isGranted || p.isGranted;
+  }
+
+  Future<void> _unduhVideo() async {
+    if (_videoData?['urls'] == null || _videoData!['urls'].isEmpty) return;
+    if (_isDownloading) return;
+    setState(() => _isDownloading = true);
     try {
+      if (!await _ensureStoragePerm()) {
+        throw Exception("Izin penyimpanan ditolak.");
+      }
       final videoUrl = _videoData!['urls'][0];
-      final response = await http.get(Uri.parse(videoUrl), headers: _videoHeaders);
+      final response = await http.get(Uri.parse(videoUrl), headers: _videoHeaders).timeout(const Duration(seconds: 120));
+      if (response.statusCode != 200) throw Exception("Server mengembalikan ${response.statusCode}.");
       final tempDir = await getTemporaryDirectory();
       final file = File('${tempDir.path}/tiktok_${DateTime.now().millisecondsSinceEpoch}.mp4');
       await file.writeAsBytes(response.bodyBytes);
 
-      await Share.shareXFiles([XFile(file.path)],
-        text: 'Video TikTok dari: ${_videoData!['metadata']?['creator'] ?? 'Unknown'}',
-      );
-    } catch (e) {
+      final ok = await GallerySaver.saveVideo(file.path);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error sharing: $e', style: TextStyle(color: primaryWhite)),
+          content: Text(ok == true ? 'Video tersimpan di Galeri (Movies).' : 'Gagal menyimpan ke Galeri.',
+              style: TextStyle(color: primaryWhite)),
+          backgroundColor: primaryPurple,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e', style: TextStyle(color: primaryWhite)),
           backgroundColor: primaryPurple, // Diubah ke ungu
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -158,6 +183,8 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
           ),
         ),
       );
+    } finally {
+      if (mounted) setState(() => _isDownloading = false);
     }
   }
 
@@ -439,11 +466,11 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
 
                               const SizedBox(height: 16),
 
-                              // Share Button
+                              // Unduh Button (save ke Galeri Movies)
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
-                                  onPressed: _shareVideo,
+                                  onPressed: _isDownloading ? null : _unduhVideo,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: accentPurple,
                                     foregroundColor: primaryWhite,
@@ -457,10 +484,10 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.share, size: 20, color: primaryWhite),
+                                      Icon(_isDownloading ? Icons.hourglass_top : Icons.download, size: 20, color: primaryWhite),
                                       SizedBox(width: 8),
                                       Text(
-                                        'SHARE VIDEO',
+                                        _isDownloading ? 'MENGUNDUH...' : 'UNDUH',
                                         style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold,

@@ -5,7 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:gallery_saver/gallery_saver.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 
 class MoriDownloaderPage extends StatefulWidget {
@@ -188,30 +189,54 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> {
         });
       }).catchError((e) {
         if (!mounted) return;
-        setState(() => _errorMessage = "Video tidak bisa diputar langsung. Gunakan DOWNLOAD untuk simpan & putar offline.");
+        setState(() => _errorMessage = "Video tidak bisa diputar langsung. Gunakan UNDUH untuk simpan ke Galeri.");
       });
   }
 
-  Future<void> _downloadShare() async {
+  bool _isDownloading = false;
+
+  Future<bool> _ensureStoragePerm() async {
+    if (await Permission.storage.isGranted) return true;
+    if ((await Permission.storage.request()).isGranted) return true;
+    final v = await Permission.videos.request();
+    final p = await Permission.photos.request();
+    return v.isGranted || p.isGranted;
+  }
+
+  Future<void> _unduh() async {
     final urls = (_result?['urls'] as List?) ?? [];
-    if (urls.isEmpty) return;
+    if (urls.isEmpty || _isDownloading) return;
+    setState(() => _isDownloading = true);
     final headers = _headersFor(_platform ?? 'universal');
     try {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Mengunduh...', style: TextStyle(color: primaryWhite)), backgroundColor: primaryPurple),
-      );
+      if (!await _ensureStoragePerm()) {
+        throw Exception("Izin penyimpanan ditolak.");
+      }
       final url = urls[0].toString();
-      final ext = RegExp(r'\.(jpg|jpeg|png|webp)(\?|$)').hasMatch(url.split('?')[0].toLowerCase()) ? 'jpg' : 'mp4';
+      final isPhoto = RegExp(r'\.(jpg|jpeg|png|webp)(\?|$)').hasMatch(url.split('?')[0].toLowerCase());
       final response = await http.get(Uri.parse(url), headers: headers).timeout(const Duration(seconds: 120));
+      if (response.statusCode != 200) throw Exception("Server mengembalikan ${response.statusCode}.");
       final tempDir = await getTemporaryDirectory();
+      final ext = isPhoto ? 'jpg' : 'mp4';
       final file = File('${tempDir.path}/mori_${DateTime.now().millisecondsSinceEpoch}.$ext');
       await file.writeAsBytes(response.bodyBytes);
-      await Share.shareXFiles([XFile(file.path)], text: 'Media dari: ${_result!['metadata']?['creator'] ?? 'Unknown'}');
+      final ok = isPhoto ? await GallerySaver.saveImage(file.path) : await GallerySaver.saveVideo(file.path);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(ok == true ? 'Media tersimpan di Galeri.' : 'Gagal menyimpan ke Galeri.',
+              style: TextStyle(color: primaryWhite)),
+          backgroundColor: primaryPurple,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e', style: TextStyle(color: primaryWhite)), backgroundColor: primaryPurple),
       );
+    } finally {
+      if (mounted) setState(() => _isDownloading = false);
     }
   }
 
@@ -393,7 +418,7 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> {
                         loadingBuilder: (c, child, p) => p == null ? child : Center(child: CircularProgressIndicator(color: accentPurple)),
                         errorBuilder: (c, e, s) => Padding(
                               padding: const EdgeInsets.all(24),
-                              child: Text('Gambar tidak bisa dimuat. Gunakan DOWNLOAD.', style: TextStyle(color: accentPurple)),
+                              child: Text('Gambar tidak bisa dimuat. Gunakan UNDUH.', style: TextStyle(color: accentPurple)),
                             )),
                   ),
                 const SizedBox(height: 12),
@@ -408,19 +433,20 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _downloadShare,
+                    onPressed: _isDownloading ? null : _unduh,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: accentPurple,
                       foregroundColor: primaryWhite,
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.share, size: 20, color: Colors.white),
-                        SizedBox(width: 8),
-                        Text('DOWNLOAD & SHARE', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, fontFamily: 'Orbitron', color: Colors.white)),
+                        Icon(_isDownloading ? Icons.hourglass_top : Icons.download, size: 20, color: Colors.white),
+                        const SizedBox(width: 8),
+                        Text(_isDownloading ? 'MENGUNDUH...' : 'UNDUH',
+                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, fontFamily: 'Orbitron', color: Colors.white)),
                       ],
                     ),
                   ),

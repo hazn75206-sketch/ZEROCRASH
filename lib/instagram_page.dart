@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:gallery_saver/gallery_saver.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
@@ -121,29 +122,57 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
         }).catchError((e) {
           if (!mounted) return;
           setState(() {
-            _errorMessage = "Video tidak bisa diputar langsung. Gunakan SHARE VIDEO untuk unduh & putar offline.";
+            _errorMessage = "Video tidak bisa diputar langsung. Gunakan UNDUH untuk simpan & putar offline.";
           });
         });
     }
   }
 
-  Future<void> _shareVideo() async {
-    if (_mediaData == null || _mediaData!.isEmpty) return;
+  bool _isDownloading = false;
 
+  Future<bool> _ensureStoragePerm() async {
+    if (await Permission.storage.isGranted) return true;
+    if ((await Permission.storage.request()).isGranted) return true;
+    final v = await Permission.videos.request();
+    final p = await Permission.photos.request();
+    return v.isGranted || p.isGranted;
+  }
+
+  Future<void> _unduhMedia() async {
+    if (_mediaData == null || _mediaData!.isEmpty) return;
+    if (_isDownloading) return;
+    setState(() => _isDownloading = true);
     try {
-      final mediaUrl = _mediaData![0]['url'];
-      final response = await http.get(Uri.parse(mediaUrl), headers: _videoHeaders);
+      if (!await _ensureStoragePerm()) {
+        throw Exception("Izin penyimpanan ditolak.");
+      }
+      final mediaUrl = _mediaData![0]['url'].toString();
+      final isPhoto = RegExp(r'\.(jpg|jpeg|png|webp)(\?|$)').hasMatch(mediaUrl.split('?')[0].toLowerCase());
+      final response = await http.get(Uri.parse(mediaUrl), headers: _videoHeaders).timeout(const Duration(seconds: 120));
+      if (response.statusCode != 200) throw Exception("Server mengembalikan ${response.statusCode}.");
       final tempDir = await getTemporaryDirectory();
-      final file = File('${tempDir.path}/instagram_${DateTime.now().millisecondsSinceEpoch}.mp4');
+      final ext = isPhoto ? 'jpg' : 'mp4';
+      final file = File('${tempDir.path}/instagram_${DateTime.now().millisecondsSinceEpoch}.$ext');
       await file.writeAsBytes(response.bodyBytes);
 
-      await Share.shareXFiles([XFile(file.path)],
-        text: 'Video Instagram',
-      );
-    } catch (e) {
+      final ok = isPhoto
+          ? await GallerySaver.saveImage(file.path)
+          : await GallerySaver.saveVideo(file.path);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error sharing: $e', style: TextStyle(color: primaryWhite)),
+          content: Text(ok == true ? 'Media tersimpan di Galeri.' : 'Gagal menyimpan ke Galeri.',
+              style: TextStyle(color: primaryWhite)),
+          backgroundColor: primaryPurple,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e', style: TextStyle(color: primaryWhite)),
           backgroundColor: primaryPurple, // Diubah ke ungu
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -151,6 +180,8 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
           ),
         ),
       );
+    } finally {
+      if (mounted) setState(() => _isDownloading = false);
     }
   }
 
@@ -488,7 +519,7 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _shareVideo,
+                          onPressed: _isDownloading ? null : _unduhMedia,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: accentPurple, // Diubah ke ungu
                             foregroundColor: primaryWhite,
@@ -499,14 +530,14 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
                             elevation: 4,
                             shadowColor: accentPurple.withValues(alpha: 0.5), // Diubah ke ungu
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.share, size: 20),
-                              SizedBox(width: 8),
+                              Icon(_isDownloading ? Icons.hourglass_top : Icons.download, size: 20),
+                              const SizedBox(width: 8),
                               Text(
-                                'SHARE VIDEO',
-                                style: TextStyle(
+                                _isDownloading ? 'MENGUNDUH...' : 'UNDUH',
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'Orbitron',
