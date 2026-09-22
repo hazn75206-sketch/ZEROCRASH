@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
-import 'package:gallery_saver/gallery_saver.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:gal/gal.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
@@ -137,21 +136,13 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
 
   bool _isDownloading = false;
 
-  Future<bool> _ensureStoragePerm() async {
-    if (await Permission.storage.isGranted) return true;
-    if ((await Permission.storage.request()).isGranted) return true;
-    final v = await Permission.videos.request();
-    final p = await Permission.photos.request();
-    return v.isGranted || p.isGranted;
-  }
-
   Future<void> _unduhVideo() async {
     if (_videoData?['urls'] == null || _videoData!['urls'].isEmpty) return;
     if (_isDownloading) return;
     setState(() => _isDownloading = true);
     try {
-      if (!await _ensureStoragePerm()) {
-        throw Exception("Izin penyimpanan ditolak.");
+      if (!await Gal.hasAccess()) {
+        await Gal.requestAccess();
       }
       final videoUrl = _videoData!['urls'][0];
       final response = await http.get(Uri.parse(videoUrl), headers: _videoHeaders).timeout(const Duration(seconds: 120));
@@ -160,11 +151,11 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
       final file = File('${tempDir.path}/tiktok_${DateTime.now().millisecondsSinceEpoch}.mp4');
       await file.writeAsBytes(response.bodyBytes);
 
-      final ok = await GallerySaver.saveVideo(file.path);
+      await Gal.putVideo(file.path);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(ok == true ? 'Video tersimpan di Galeri (Movies).' : 'Gagal menyimpan ke Galeri.',
+          content: Text('Video tersimpan di Galeri.',
               style: TextStyle(color: primaryWhite)),
           backgroundColor: primaryPurple,
           behavior: SnackBarBehavior.floating,

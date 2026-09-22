@@ -5,8 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
-import 'package:gallery_saver/gallery_saver.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:gal/gal.dart';
 import 'package:path_provider/path_provider.dart';
 
 class MoriDownloaderPage extends StatefulWidget {
@@ -195,22 +194,14 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> {
 
   bool _isDownloading = false;
 
-  Future<bool> _ensureStoragePerm() async {
-    if (await Permission.storage.isGranted) return true;
-    if ((await Permission.storage.request()).isGranted) return true;
-    final v = await Permission.videos.request();
-    final p = await Permission.photos.request();
-    return v.isGranted || p.isGranted;
-  }
-
   Future<void> _unduh() async {
     final urls = (_result?['urls'] as List?) ?? [];
     if (urls.isEmpty || _isDownloading) return;
     setState(() => _isDownloading = true);
     final headers = _headersFor(_platform ?? 'universal');
     try {
-      if (!await _ensureStoragePerm()) {
-        throw Exception("Izin penyimpanan ditolak.");
+      if (!await Gal.hasAccess()) {
+        await Gal.requestAccess();
       }
       final url = urls[0].toString();
       final isPhoto = RegExp(r'\.(jpg|jpeg|png|webp)(\?|$)').hasMatch(url.split('?')[0].toLowerCase());
@@ -220,11 +211,15 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> {
       final ext = isPhoto ? 'jpg' : 'mp4';
       final file = File('${tempDir.path}/mori_${DateTime.now().millisecondsSinceEpoch}.$ext');
       await file.writeAsBytes(response.bodyBytes);
-      final ok = isPhoto ? await GallerySaver.saveImage(file.path) : await GallerySaver.saveVideo(file.path);
+      if (isPhoto) {
+        await Gal.putImage(file.path);
+      } else {
+        await Gal.putVideo(file.path);
+      }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(ok == true ? 'Media tersimpan di Galeri.' : 'Gagal menyimpan ke Galeri.',
+          content: Text('Media tersimpan di Galeri.',
               style: TextStyle(color: primaryWhite)),
           backgroundColor: primaryPurple,
           behavior: SnackBarBehavior.floating,

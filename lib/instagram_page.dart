@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
-import 'package:gallery_saver/gallery_saver.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:gal/gal.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
@@ -130,21 +129,13 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
 
   bool _isDownloading = false;
 
-  Future<bool> _ensureStoragePerm() async {
-    if (await Permission.storage.isGranted) return true;
-    if ((await Permission.storage.request()).isGranted) return true;
-    final v = await Permission.videos.request();
-    final p = await Permission.photos.request();
-    return v.isGranted || p.isGranted;
-  }
-
   Future<void> _unduhMedia() async {
     if (_mediaData == null || _mediaData!.isEmpty) return;
     if (_isDownloading) return;
     setState(() => _isDownloading = true);
     try {
-      if (!await _ensureStoragePerm()) {
-        throw Exception("Izin penyimpanan ditolak.");
+      if (!await Gal.hasAccess()) {
+        await Gal.requestAccess();
       }
       final mediaUrl = _mediaData![0]['url'].toString();
       final isPhoto = RegExp(r'\.(jpg|jpeg|png|webp)(\?|$)').hasMatch(mediaUrl.split('?')[0].toLowerCase());
@@ -155,13 +146,15 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
       final file = File('${tempDir.path}/instagram_${DateTime.now().millisecondsSinceEpoch}.$ext');
       await file.writeAsBytes(response.bodyBytes);
 
-      final ok = isPhoto
-          ? await GallerySaver.saveImage(file.path)
-          : await GallerySaver.saveVideo(file.path);
+      if (isPhoto) {
+        await Gal.putImage(file.path);
+      } else {
+        await Gal.putVideo(file.path);
+      }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(ok == true ? 'Media tersimpan di Galeri.' : 'Gagal menyimpan ke Galeri.',
+          content: Text('Media tersimpan di Galeri.',
               style: TextStyle(color: primaryWhite)),
           backgroundColor: primaryPurple,
           behavior: SnackBarBehavior.floating,
