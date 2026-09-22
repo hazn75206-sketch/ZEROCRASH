@@ -7,6 +7,7 @@ import 'ddos_panel.dart';
 import 'nik_check.dart';
 import 'tiktok_page.dart';
 import 'instagram_page.dart';
+import 'mori_downloader_page.dart';
 import 'qr_gen.dart';
 import 'domain_page.dart';
 import 'spam_ngl.dart';
@@ -171,6 +172,15 @@ class ToolsPage extends StatelessWidget {
               title: "Downloader",
               subtitle: "Social Media",
               children: [
+                _buildToolItem(
+                  context: context,
+                  icon: Icons.all_inclusive,
+                  label: "Mori Downloader",
+                  badge: "NEW",
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const MoriDownloaderPage()));
+                  },
+                ),
                 _buildToolItem(
                   context: context,
                   icon: Icons.video_library,

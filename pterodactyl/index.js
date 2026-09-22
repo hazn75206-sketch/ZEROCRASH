@@ -307,6 +307,53 @@ app.get('/api/tools/text2qr', async (req, res) => {
     res.json({ status: true, result: { text, qr: dataUrl } });
   } catch (e) { res.json({ status: false, message: e.message }); }
 });
+function detectPlatform(url) {
+  const u = String(url).toLowerCase();
+  if (u.includes('tiktok.com') || u.includes('vt.tiktok') || u.includes('vm.tiktok')) return 'tiktok';
+  if (u.includes('instagram.com')) return 'instagram';
+  if (u.includes('youtube.com') || u.includes('youtu.be') || u.includes('music.youtube')) return 'youtube';
+  if (u.includes('twitter.com') || u.includes('x.com')) return 'twitter';
+  if (u.includes('facebook.com') || u.includes('fb.watch') || u.includes('fb.com')) return 'facebook';
+  if (u.includes('pinterest.com') || u.includes('pin.it')) return 'pinterest';
+  if (u.includes('threads.com') || u.includes('threads.net')) return 'threads';
+  if (u.includes('spotify.com') || u.includes('spotify.link')) return 'spotify';
+  if (u.includes('music.apple.com')) return 'applemusic';
+  if (u.includes('bilibili.com') || u.includes('b23.tv') || u.includes('bili.im')) return 'bilibili';
+  if (u.includes('douyin.com') || u.includes('v.douyin')) return 'douyin';
+  if (u.includes('xiaohongshu') || u.includes('xhslink')) return 'rednote';
+  if (u.includes('pixiv.net')) return 'pixiv';
+  if (u.includes('bandcamp.com')) return 'bandcamp';
+  return 'universal';
+}
+// Universal downloader (Mori-style, yt-dlp 1800+ sites) - siputzx-compatible: {status, platform, data}
+app.get('/api/d/universal', async (req, res) => {
+  const url = req.query.url;
+  if (!url) return res.json({ status: false, message: 'missing url' });
+  const platform = detectPlatform(url);
+  if (platform === 'spotify' || platform === 'applemusic') {
+    return res.json({ status: false, platform, message: 'Audio platform (Spotify/Apple Music) segera hadir. Gunakan Spotify/Apple app untuk audio.' });
+  }
+  try {
+    const clean = String(url).replace(/"/g, '').split(' ')[0].split('\n')[0];
+    const j = await ytdlpJson(clean);
+    const items = [];
+    const pushUrl = (u, kind) => { if (u && typeof u === 'string' && u.startsWith('http')) items.push({ url: u, kind: kind || (/(\.jpg|\.jpeg|\.png|\.webp)/i.test(u.split('?')[0]) ? 'photo' : 'video') }); };
+    if (j.url) pushUrl(j.url);
+    if (j.entries && j.entries.length) {
+      for (const e of j.entries.slice(0, 20)) {
+        if (!e) continue;
+        if (e.url) pushUrl(e.url);
+        else if (e.requested_formats && e.requested_formats.length) pushUrl(e.requested_formats[0].url);
+        else if (e.formats && e.formats.length) pushUrl(e.formats[e.formats.length - 1].url);
+      }
+    }
+    if (!items.length && j.requested_formats) j.requested_formats.forEach(f => { if (f.url) pushUrl(f.url); });
+    if (!items.length && j.formats) { const f = j.formats.filter(x => x.url && x.ext === 'mp4').pop() || j.formats.filter(x => x.url).pop(); if (f) pushUrl(f.url); }
+    if (!items.length) return res.json({ status: false, platform, message: 'no media found' });
+    const firstVideo = items.find(i => i.kind === 'video');
+    res.json({ status: true, platform, data: { urls: items.map(i => i.url), metadata: { title: j.title || 'Media', creator: j.uploader || j.creator || j.channel || 'Unknown', author: j.uploader || 'Unknown', thumbnail: j.thumbnail || '' } }, items, kind: firstVideo ? 'video' : items[0].kind });
+  } catch (e) { res.json({ status: false, platform, message: 'gagal mengambil media: ' + String(e && e.message || e).slice(0, 200) }); }
+});
 app.get('/ping', (req, res) => res.json({ ok: true, time: new Date().toISOString() }));
 app.get('/', (req, res) => res.json({ ok: true, service: 'Zero Crash Railway - Real (no device lock)', uptime: process.uptime(), db: { users: db.users.length, servers: db.servers.length } }));
 const PORT = process.env.PORT || process.env.SERVER_PORT || 20854;

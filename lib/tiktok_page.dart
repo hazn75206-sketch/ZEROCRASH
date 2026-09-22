@@ -46,7 +46,9 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
   }
 
   Future<void> _downloadTiktok() async {
-    final url = _urlController.text.trim();
+    final raw = _urlController.text.trim();
+    final match = RegExp(r'https?://[^\s]+').firstMatch(raw);
+    final url = match != null ? match.group(0)! : raw;
     if (url.isEmpty) {
       setState(() {
         _errorMessage = "URL TikTok tidak boleh kosong.";
