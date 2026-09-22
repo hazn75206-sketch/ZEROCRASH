@@ -433,7 +433,7 @@ class _SellerPageState extends State<SellerPage> {
                     _buildInput(
                       label: "Username Target",
                       controller: editUsernameController,
-                      icon: FontAwesomeIcons.userEdit,
+                      icon: FontAwesomeIcons.userPen,
                       hint: "Username member yang ingin diperpanjang",
                     ),
                     _buildInput(

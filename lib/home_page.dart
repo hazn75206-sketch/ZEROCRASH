@@ -34,14 +34,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   String _selectedBugMode = "number";
   String _senderMode = "private";
-  int _privateSenderCount = 0;
   int _globalSenderCount = 0;
   bool _isSending = false;
 
   // Warna oranye DarkVerse
   static const Color _gold = Color(0xFFFF8C00); // Accent orange
   static const Color _goldDark = Color(0xFFB86200); // Darker orange
-  static const Color _goldLight = Color(0xFFFFA940); // Light orange
   
   static const Color _bgDeep = Color(0xFF000000);
   static const Color _bgCard = Color(0xFF0A0A0A);
@@ -95,7 +93,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         final data = jsonDecode(res.body);
         if (data['valid'] == true) {
           setState(() {
-            _privateSenderCount = data['private'] ?? 0;
             _globalSenderCount = data['global'] ?? 0;
           });
         }

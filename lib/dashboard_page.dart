@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
-import 'dart:ui' as dart_ui;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -89,8 +87,6 @@ class _DashboardPageState extends State<DashboardPage>
   static const Color _bgSurface = Color(0xFF080500);
   static const Color _accent = Color(0xFFFF8C00);
   static const Color _accentDeep = Color(0xFFB86200);
-  static const Color _accentGlow = Color(0xFFFF6D00);
-  static const Color _accentSoft = Color(0xFFFFA940);
   static const Color _textMuted = Color(0xFF8A7E6E);
   static const Color _textSubtle = Color(0xFF3D3529);
   static const Color _border = Color(0xFF1A1008);
@@ -189,45 +185,6 @@ class _DashboardPageState extends State<DashboardPage>
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       throw Exception("Could not launch $uri");
     }
-  }
-
-  void _handleInvalidSession(String message) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    if (!mounted) return;
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      barrierColor: Colors.black.withValues(alpha: 0.85),
-      builder: (_) => AlertDialog(
-        backgroundColor: _bgCard,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-            side: BorderSide(color: _accent.withValues(alpha: 0.25))),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: _accent.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
-              child: const Icon(Icons.warning_amber_rounded, color: _accent, size: 22),
-            ),
-            const SizedBox(width: 12),
-            const Flexible(child: Text("Session Expired", style: TextStyle(color: _accent, fontWeight: FontWeight.bold, fontSize: 16, fontFamily: 'Orbitron')))
-          ],
-        ),
-        content: Text(message, style: const TextStyle(color: _textMuted, fontSize: 13, height: 1.5)),
-        actions: [
-          Container(
-            decoration: BoxDecoration(color: _accent.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(12), border: Border.all(color: _accent.withValues(alpha: 0.3))),
-            child: TextButton(
-              onPressed: () => Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const LoginPage()), (route) => false),
-              child: const Text("OK", style: TextStyle(color: _accent, fontWeight: FontWeight.bold, fontFamily: 'Orbitron', fontSize: 12)),
-            ),
-          )
-        ],
-      ),
-    );
   }
 
   void _onBottomNavTapped(int index) {

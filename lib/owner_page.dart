@@ -633,7 +633,7 @@ class _OwnerPageState extends State<OwnerPage> {
                     _buildInput(
                       label: "Username Target",
                       controller: editUsernameController,
-                      icon: FontAwesomeIcons.userEdit,
+                      icon: FontAwesomeIcons.userPen,
                     ),
                     _buildInput(
                       label: "Tambah Hari",

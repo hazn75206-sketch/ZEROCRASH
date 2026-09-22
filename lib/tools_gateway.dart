@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'manage_server.dart';
 import 'wifi_internal.dart';
@@ -31,8 +30,6 @@ class ToolsPage extends StatelessWidget {
   static const Color _bgCard = Color(0xFF0A0A0A);
   static const Color _bgItem = Color(0xFF050505);
   static const Color _red = Color(0xFFFF0040);
-  static const Color _redDark = Color(0xFF8B0020);
-  static const Color _redGlow = Color(0xFFFF0040);
   static const Color _textMuted = Color(0xFF6B6B6B);
   static const Color _textSubtle = Color(0xFF3D3D3D);
 

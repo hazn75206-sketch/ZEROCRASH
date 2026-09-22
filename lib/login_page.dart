@@ -4,8 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'video_splash_page.dart';
 
 // Firebase Auth+Firestore - Vercel baseUrl deprecated, use Firebase
@@ -140,7 +138,7 @@ class _LoginPageState extends State<LoginPage>
   Future<String> getAndroidId() async {
     final deviceInfo = DeviceInfoPlugin();
     final android = await deviceInfo.androidInfo;
-    return android.id ?? "unknown_device";
+    return android.id;
   }
 
   Future<void> login() async {
