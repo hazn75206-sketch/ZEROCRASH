@@ -232,33 +232,47 @@ app.get('/killWifi', async (req, res) => {
   logActivity(req.query.key, 'killWifi real to ' + req.query.target);
   res.json({ valid: true, sended: true, message: 'killWifi REAL via server (VPS root, bukan HP)', status: true });
 });
-// Native downloader (N1 yt-dlp) - siputzx-compatible shape: {status, data:{urls, metadata}}
+// Native downloader (yt-dlp-exec via npm, no apt) - siputzx-compatible: {status, data}
+async function ytdlpJson(clean) {
+  try {
+    const ytdlp = require('yt-dlp-exec');
+    const out = await ytdlp(clean, { dumpSingleJson: true, noWarnings: true, socketTimeout: 20 });
+    if (out && typeof out === 'object') return out;
+    return JSON.parse(String(out));
+  } catch (_) {}
+  const { stdout } = await execAsync('yt-dlp -j --no-warnings --socket-timeout 20 "' + clean + '"', { maxBuffer: 10 * 1024 * 1024 });
+  return JSON.parse(stdout);
+}
+function pickVideoUrl(j) {
+  if (j.url) return j.url;
+  if (j.requested_formats && j.requested_formats.length) return j.requested_formats[0].url;
+  if (j.formats && j.formats.length) return j.formats[j.formats.length - 1].url;
+  return null;
+}
 app.get('/api/d/tiktok', async (req, res) => {
   const url = req.query.url;
   if (!url) return res.json({ status: false, message: 'missing url' });
   try {
     const clean = String(url).replace(/"/g, '').split(' ')[0];
-    const { stdout } = await execAsync('yt-dlp -j --no-warnings --socket-timeout 20 "' + clean + '"', { maxBuffer: 10 * 1024 * 1024 });
-    const j = JSON.parse(stdout);
-    const videoUrl = j.url || (j.requested_formats && j.requested_formats[0] && j.requested_formats[0].url) || (j.formats && j.formats.length && j.formats[j.formats.length - 1].url) || null;
+    const j = await ytdlpJson(clean);
+    const videoUrl = pickVideoUrl(j);
     if (!videoUrl) return res.json({ status: false, message: 'no video url in yt-dlp output' });
     res.json({ status: true, data: { urls: [videoUrl], metadata: { title: j.title || 'TikTok Video', creator: j.uploader || j.creator || j.channel || 'Unknown', author: j.uploader || 'Unknown', thumbnail: j.thumbnail || '' } } });
-  } catch (e) { res.json({ status: false, message: 'yt-dlp failed: ' + String(e.message).slice(0, 300) }); }
+  } catch (e) { res.json({ status: false, message: 'yt-dlp failed: ' + String(e && e.message || e).slice(0, 300) }); }
 });
 app.get('/api/d/igdl', async (req, res) => {
   const url = req.query.url;
   if (!url) return res.json({ status: false });
   try {
     const clean = String(url).replace(/"/g, '').split(' ')[0];
-    const { stdout } = await execAsync('yt-dlp -j --no-warnings --socket-timeout 20 "' + clean + '"', { maxBuffer: 10 * 1024 * 1024 });
-    const j = JSON.parse(stdout);
+    const j = await ytdlpJson(clean);
     const urls = [];
     if (j.url) urls.push({ url: j.url });
     else if (j.entries && j.entries.length) { j.entries.forEach(e => { if (e && e.url) urls.push({ url: e.url }); }); }
     else if (j.requested_formats) { j.requested_formats.forEach(f => { if (f.url) urls.push({ url: f.url }); }); }
     if (!urls.length) return res.json({ status: false, message: 'no media found' });
     res.json({ status: true, data: urls });
-  } catch (e) { res.json({ status: false, message: 'yt-dlp ig failed: ' + String(e.message).slice(0, 300) }); }
+  } catch (e) { res.json({ status: false, message: 'yt-dlp ig failed: ' + String(e && e.message || e).slice(0, 300) }); }
 });
 app.get('/api/tools/nik-checker', (req, res) => {
   const nik = req.query.nik;
@@ -270,9 +284,11 @@ app.get('/api/tools/dns', async (req, res) => {
   const domain = req.query.domain;
   if (!domain) return res.json({ status: false });
   try {
-    const { stdout } = await execAsync('nslookup ' + String(domain).replace(/[^a-zA-Z0-9.-]/g, ''));
-    res.json({ status: true, result: { domain, data: stdout.trim() } });
-  } catch (e) { res.json({ status: false, message: e.message }); }
+    const dns = require('dns').promises;
+    const clean = String(domain).replace(/[^a-zA-Z0-9.-]/g, '');
+    const ips = await dns.resolve4(clean);
+    res.json({ status: true, result: { domain: clean, ips } });
+  } catch (e) { res.json({ status: false, message: String(e && e.message || e).slice(0, 200) }); }
 });
 app.get('/api/tools/text2qr', async (req, res) => {
   const text = req.query.text;
