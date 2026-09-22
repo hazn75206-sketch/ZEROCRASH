@@ -232,15 +232,23 @@ app.get('/killWifi', async (req, res) => {
   logActivity(req.query.key, 'killWifi real to ' + req.query.target);
   res.json({ valid: true, sended: true, message: 'killWifi REAL via server (VPS root, bukan HP)', status: true });
 });
-// Native downloader (yt-dlp-exec via npm, no apt) - siputzx-compatible: {status, data}
+// Native downloader - yt-dlp binary downloaded at RUNTIME to /tmp (no apt, no npm postinstall)
+let ytdlpReady = null;
+function ensureYtDlp() {
+  if (ytdlpReady) return ytdlpReady;
+  ytdlpReady = (async () => {
+    try { await execAsync('test -x /tmp/yt-dlp && /tmp/yt-dlp --version'); return '/tmp/yt-dlp'; } catch (_) {}
+    try { await execAsync('which yt-dlp && yt-dlp --version'); return 'yt-dlp'; } catch (_) {}
+    await execAsync('curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux -o /tmp/yt-dlp && chmod +x /tmp/yt-dlp', { maxBuffer: 10 * 1024 * 1024 });
+    await execAsync('/tmp/yt-dlp --version');
+    return '/tmp/yt-dlp';
+  })();
+  ytdlpReady.catch(() => { ytdlpReady = null; });
+  return ytdlpReady;
+}
 async function ytdlpJson(clean) {
-  try {
-    const ytdlp = require('yt-dlp-exec');
-    const out = await ytdlp(clean, { dumpSingleJson: true, noWarnings: true, socketTimeout: 20 });
-    if (out && typeof out === 'object') return out;
-    return JSON.parse(String(out));
-  } catch (_) {}
-  const { stdout } = await execAsync('yt-dlp -j --no-warnings --socket-timeout 20 "' + clean + '"', { maxBuffer: 10 * 1024 * 1024 });
+  const bin = await ensureYtDlp();
+  const { stdout } = await execAsync(bin + ' -j --no-warnings --socket-timeout 20 "' + clean + '"', { maxBuffer: 10 * 1024 * 1024 });
   return JSON.parse(stdout);
 }
 function pickVideoUrl(j) {
