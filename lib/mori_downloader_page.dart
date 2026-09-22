@@ -7,6 +7,7 @@ import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import 'package:gal/gal.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'mori/mori_api.dart';
 
 class MoriDownloaderPage extends StatefulWidget {
@@ -16,7 +17,7 @@ class MoriDownloaderPage extends StatefulWidget {
   State<MoriDownloaderPage> createState() => _MoriDownloaderPageState();
 }
 
-class _MoriDownloaderPageState extends State<MoriDownloaderPage> {
+class _MoriDownloaderPageState extends State<MoriDownloaderPage> with SingleTickerProviderStateMixin {
   final TextEditingController _urlController = TextEditingController();
   bool _isLoading = false;
   Map<String, dynamic>? _result;
@@ -24,6 +25,7 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> {
   String? _errorMessage;
   VideoPlayerController? _videoController;
   ChewieController? _chewieController;
+  late AnimationController _spinController;
 
   final Color bgDark = const Color(0xFF00050B);
   final Color cardDark = const Color(0xFF0A1118);
@@ -35,20 +37,20 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> {
   static const String _apiBase = "https://private-server-production.up.railway.app";
 
   static const Map<String, Map<String, dynamic>> _platforms = {
-    'tiktok': {'name': 'TikTok', 'icon': Icons.music_note},
-    'instagram': {'name': 'Instagram', 'icon': Icons.camera_alt},
-    'youtube': {'name': 'YouTube', 'icon': Icons.play_circle_fill},
-    'facebook': {'name': 'Facebook', 'icon': Icons.facebook},
-    'twitter': {'name': 'Twitter/X', 'icon': Icons.alternate_email},
-    'pinterest': {'name': 'Pinterest', 'icon': Icons.push_pin},
-    'threads': {'name': 'Threads', 'icon': Icons.forum},
-    'bilibili': {'name': 'Bilibili', 'icon': Icons.live_tv},
-    'douyin': {'name': 'Douyin', 'icon': Icons.video_library},
-    'rednote': {'name': 'RedNote', 'icon': Icons.book},
-    'pixiv': {'name': 'Pixiv', 'icon': Icons.brush},
-    'bandcamp': {'name': 'Bandcamp', 'icon': Icons.album},
-    'spotify': {'name': 'Spotify', 'icon': Icons.headphones},
-    'applemusic': {'name': 'Apple Music', 'icon': Icons.library_music},
+    'tiktok': {'name': 'TikTok', 'icon': FontAwesomeIcons.tiktok},
+    'instagram': {'name': 'Instagram', 'icon': FontAwesomeIcons.instagram},
+    'youtube': {'name': 'YouTube', 'icon': FontAwesomeIcons.youtube},
+    'facebook': {'name': 'Facebook', 'icon': FontAwesomeIcons.facebook},
+    'twitter': {'name': 'Twitter/X', 'icon': FontAwesomeIcons.xTwitter},
+    'pinterest': {'name': 'Pinterest', 'icon': FontAwesomeIcons.pinterest},
+    'threads': {'name': 'Threads', 'icon': FontAwesomeIcons.threads},
+    'bilibili': {'name': 'Bilibili', 'icon': FontAwesomeIcons.bilibili},
+    'douyin': {'name': 'Douyin', 'icon': FontAwesomeIcons.tiktok},
+    'rednote': {'name': 'RedNote', 'icon': FontAwesomeIcons.book},
+    'pixiv': {'name': 'Pixiv', 'icon': FontAwesomeIcons.pixiv},
+    'bandcamp': {'name': 'Bandcamp', 'icon': FontAwesomeIcons.bandcamp},
+    'spotify': {'name': 'Spotify', 'icon': FontAwesomeIcons.spotify},
+    'applemusic': {'name': 'Apple Music', 'icon': FontAwesomeIcons.apple},
   };
 
   static String detectPlatform(String url) {
@@ -97,6 +99,7 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> {
   @override
   void initState() {
     super.initState();
+    _spinController = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
     _pasteFromClipboard();
   }
 
@@ -112,6 +115,7 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> {
 
   @override
   void dispose() {
+    _spinController.dispose();
     _urlController.dispose();
     _videoController?.dispose();
     _chewieController?.dispose();
@@ -131,6 +135,7 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> {
     final url = match != null ? match.group(0)! : input;
     final platform = detectPlatform(url);
 
+    _spinController.repeat();
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -171,6 +176,7 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> {
     } catch (e) {
       setState(() => _errorMessage = "Terjadi kesalahan: $e");
     } finally {
+      _spinController.stop();
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -304,7 +310,7 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> {
                     if (plat != null)
                       Row(
                         children: [
-                          Icon(plat['icon'] as IconData, color: accentPurple, size: 18),
+                          FaIcon(plat['icon'] as IconData, color: accentPurple, size: 18),
                           const SizedBox(width: 8),
                           Text('Terdeteksi: ${plat['name']}', style: TextStyle(color: accentPurple, fontSize: 13)),
                         ],
@@ -323,7 +329,12 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(_isLoading ? Icons.hourglass_top : Icons.download, size: 20, color: primaryWhite),
+                            _isLoading
+                                ? RotationTransition(
+                                    turns: _spinController,
+                                    child: Icon(Icons.download, size: 20, color: primaryWhite),
+                                  )
+                                : Icon(Icons.download, size: 20, color: primaryWhite),
                             const SizedBox(width: 8),
                             Text(_isLoading ? 'PROSES...' : 'DOWNLOAD',
                                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Orbitron', color: Colors.white)),
@@ -341,7 +352,7 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> {
                 children: _platforms.entries.map((e) {
                   return Chip(
                     label: Text(e.value['name'] as String, style: const TextStyle(fontSize: 11, color: Colors.white70)),
-                    avatar: Icon(e.value['icon'] as IconData, size: 14, color: accentPurple),
+                    avatar: FaIcon(e.value['icon'] as IconData, size: 14, color: accentPurple),
                     backgroundColor: cardDark,
                     side: BorderSide(color: primaryPurple.withValues(alpha: 0.4)),
                   );
