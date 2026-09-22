@@ -212,24 +212,60 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> with SingleTick
   }
 
   bool _isDownloading = false;
+  double? _downloadProgress;
+  int _downloadReceived = 0;
+  int? _downloadTotal;
+
+  String _formatBytes(int b) {
+    if (b < 1024) return '$b B';
+    if (b < 1024 * 1024) return '${(b / 1024).toStringAsFixed(1)} KB';
+    return '${(b / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
 
   Future<void> _unduh() async {
     final urls = (_result?['urls'] as List?) ?? [];
     if (urls.isEmpty || _isDownloading) return;
-    setState(() => _isDownloading = true);
+    setState(() {
+      _isDownloading = true;
+      _downloadProgress = 0;
+      _downloadReceived = 0;
+      _downloadTotal = null;
+    });
     final headers = _headersFor(_platform ?? 'universal');
+    http.Client? client;
     try {
       if (!await Gal.hasAccess()) {
         await Gal.requestAccess();
       }
       final url = urls[0].toString();
       final isPhoto = RegExp(r'\.(jpg|jpeg|png|webp)(\?|$)').hasMatch(url.split('?')[0].toLowerCase());
-      final response = await http.get(Uri.parse(url), headers: headers).timeout(const Duration(seconds: 120));
-      if (response.statusCode != 200) throw Exception("Server mengembalikan ${response.statusCode}.");
+      client = http.Client();
+      final req = http.Request('GET', Uri.parse(url));
+      req.headers.addAll(headers);
+      final streamed = await client.send(req).timeout(const Duration(seconds: 120));
+      if (streamed.statusCode != 200) throw Exception("Server mengembalikan ${streamed.statusCode}.");
+      _downloadTotal = streamed.contentLength;
+      final bytes = <int>[];
+      int received = 0;
+      await for (final chunk in streamed.stream) {
+        bytes.addAll(chunk);
+        received += chunk.length;
+        final total = _downloadTotal;
+        if (mounted) {
+          setState(() {
+            _downloadReceived = received;
+            if (total != null && total > 0) {
+              _downloadProgress = received / total;
+            } else {
+              _downloadProgress = null;
+            }
+          });
+        }
+      }
       final tempDir = await getTemporaryDirectory();
       final ext = isPhoto ? 'jpg' : 'mp4';
       final file = File('${tempDir.path}/mori_${DateTime.now().millisecondsSinceEpoch}.$ext');
-      await file.writeAsBytes(response.bodyBytes);
+      await file.writeAsBytes(bytes);
       if (isPhoto) {
         await Gal.putImage(file.path);
       } else {
@@ -250,7 +286,13 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> with SingleTick
         SnackBar(content: Text('Error: $e', style: TextStyle(color: primaryWhite)), backgroundColor: primaryPurple),
       );
     } finally {
-      if (mounted) setState(() => _isDownloading = false);
+      client?.close();
+      if (mounted) {
+        setState(() {
+          _isDownloading = false;
+          _downloadProgress = null;
+        });
+      }
     }
   }
 
@@ -332,7 +374,7 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> with SingleTick
                             _isLoading
                                 ? RotationTransition(
                                     turns: _spinController,
-                                    child: Icon(Icons.download, size: 20, color: primaryWhite),
+                                    child: Icon(Icons.hourglass_top, size: 20, color: primaryWhite),
                                   )
                                 : Icon(Icons.download, size: 20, color: primaryWhite),
                             const SizedBox(width: 8),
@@ -345,20 +387,6 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> with SingleTick
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _platforms.entries.map((e) {
-                  return Chip(
-                    label: Text(e.value['name'] as String, style: const TextStyle(fontSize: 11, color: Colors.white70)),
-                    avatar: FaIcon(e.value['icon'] as IconData, size: 14, color: accentPurple),
-                    backgroundColor: cardDark,
-                    side: BorderSide(color: primaryPurple.withValues(alpha: 0.4)),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 12),
               if (_errorMessage != null)
                 Container(
                   padding: const EdgeInsets.all(14),
@@ -448,6 +476,25 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> with SingleTick
                 const SizedBox(height: 4),
                 Text('Creator: ${meta?['creator'] ?? 'Unknown'} • ${urls.length} media',
                     style: TextStyle(color: textGrey, fontSize: 13)),
+                if (_isDownloading) ...[
+                  const SizedBox(height: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      value: _downloadProgress,
+                      minHeight: 8,
+                      backgroundColor: textGrey.withValues(alpha: 0.3),
+                      valueColor: AlwaysStoppedAnimation<Color>(accentPurple),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    _downloadProgress != null
+                        ? '${(_downloadProgress! * 100).toStringAsFixed(0)}% • ${_formatBytes(_downloadReceived)}${_downloadTotal != null ? ' / ${_formatBytes(_downloadTotal!)}' : ''}'
+                        : 'Mengunduh... ${_formatBytes(_downloadReceived)}',
+                    style: TextStyle(color: accentPurple, fontSize: 12, fontWeight: FontWeight.w600),
+                  ),
+                ],
                 const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
@@ -464,7 +511,10 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> with SingleTick
                       children: [
                         Icon(_isDownloading ? Icons.hourglass_top : Icons.download, size: 20, color: Colors.white),
                         const SizedBox(width: 8),
-                        Text(_isDownloading ? 'MENGUNDUH...' : 'UNDUH',
+                        Text(
+                            _isDownloading
+                                ? (_downloadProgress != null ? 'MENGUNDUH ${(_downloadProgress! * 100).toStringAsFixed(0)}%' : 'MENGUNDUH...')
+                                : 'UNDUH',
                             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, fontFamily: 'Orbitron', color: Colors.white)),
                       ],
                     ),
