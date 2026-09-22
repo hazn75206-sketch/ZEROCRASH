@@ -246,9 +246,10 @@ function ensureYtDlp() {
   ytdlpReady.catch(() => { ytdlpReady = null; });
   return ytdlpReady;
 }
-async function ytdlpJson(clean) {
+async function ytdlpJson(clean, format) {
   const bin = await ensureYtDlp();
-  const { stdout } = await execAsync(bin + ' -j --no-warnings --socket-timeout 20 "' + clean + '"', { maxBuffer: 10 * 1024 * 1024 });
+  const f = format ? ' -f "' + format + '"' : '';
+  const { stdout } = await execAsync(bin + ' -j' + f + ' --no-warnings --socket-timeout 20 "' + clean + '"', { maxBuffer: 10 * 1024 * 1024 });
   return JSON.parse(stdout);
 }
 function pickVideoUrl(j) {
@@ -341,7 +342,7 @@ app.get('/api/d/universal', async (req, res) => {
   }
   try {
     const clean = String(url).replace(/"/g, '').split(' ')[0].split('\n')[0];
-    const j = await ytdlpJson(clean);
+    const j = await ytdlpJson(clean, 'best[ext=mp4]/best');
     const items = [];
     const pushUrl = (u, kind) => { if (u && typeof u === 'string' && u.startsWith('http')) items.push({ url: u, kind: kind || (/(\.jpg|\.jpeg|\.png|\.webp)/i.test(u.split('?')[0]) ? 'photo' : 'video') }); };
     if (j.url) pushUrl(j.url);
