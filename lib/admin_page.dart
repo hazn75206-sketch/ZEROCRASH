@@ -701,7 +701,7 @@ class _AdminPageState extends State<AdminPage> {
                             children: [
                               ..._getCurrentPageData()
                                   .map((u) => _buildUserItem(u))
-                                  .toList(),
+                                  ,
                               SizedBox(height: 20),
                               _buildPagination(),
                             ],

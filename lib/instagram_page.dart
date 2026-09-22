@@ -229,7 +229,7 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
                         Image.network(
                           media['thumbnail'] ?? media['url'],
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
+                          errorBuilder: (_, _, _) => Container(
                             color: const Color(0xFF00050B).withValues(alpha: 0.5),
                             child: Icon(Icons.videocam, color: lightPurple), // Diubah ke ungu
                           ),
@@ -251,7 +251,7 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
                         : Image.network(
                       media['url'],
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
+                      errorBuilder: (_, _, _) => Container(
                         color: const Color(0xFF00050B).withValues(alpha: 0.5),
                         child: Icon(Icons.photo, color: lightPurple), // Diubah ke ungu
                       ),

@@ -142,7 +142,7 @@ class _WifiInternalPageState extends State<WifiInternalPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [const Color(0xFF00050B), const Color(0xFF00050B)],
+            colors: [Color(0xFF00050B), Color(0xFF00050B)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),

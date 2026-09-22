@@ -378,7 +378,7 @@ class _DomainOsintPageState extends State<DomainOsintPage> {
             ),
           ],
         ),
-      )).toList(),
+      )),
     ];
   }
 

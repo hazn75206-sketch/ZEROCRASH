@@ -502,7 +502,7 @@ class _SellerPageState extends State<SellerPage> {
                         ? Center(child: CircularProgressIndicator(color: accentPurple))
                         : Column(
                       children: [
-                        ..._getCurrentPageData().map((u) => _buildUserItem(u)).toList(),
+                        ..._getCurrentPageData().map((u) => _buildUserItem(u)),
                         SizedBox(height: 20),
                         _buildPagination(),
                       ],

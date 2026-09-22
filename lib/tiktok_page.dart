@@ -33,7 +33,7 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
 
   // Gradients
   final LinearGradient purpleGradient = const LinearGradient(
-    colors: [const Color(0xFF102A43), Color(0xFFFFFFFF)],
+    colors: [Color(0xFF102A43), Color(0xFFFFFFFF)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

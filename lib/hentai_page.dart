@@ -268,7 +268,7 @@ class VideoCard extends StatelessWidget {
                       anime.image,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
+                      errorBuilder: (_, _, _) => Container(
                         color: const Color(0xFF102A43),
                         child: const Center(
                           child: Icon(
@@ -408,7 +408,7 @@ class LoadingShimmer extends StatelessWidget {
         childAspectRatio: childAspectRatio,
       ),
       itemCount: itemCount,
-      itemBuilder: (_, __) => Shimmer.fromColors(
+      itemBuilder: (_, _) => Shimmer.fromColors(
         baseColor: const Color(0xFF102A43),
         highlightColor: const Color(0xFF102A43),
         child: Container(
@@ -767,7 +767,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.all(12),
                       scrollDirection: Axis.horizontal,
                       itemCount: 5,
-                      itemBuilder: (_, __) => Container(
+                      itemBuilder: (_, _) => Container(
                         width: 120,
                         margin: const EdgeInsets.only(right: 12),
                         child: Shimmer.fromColors(
@@ -1255,7 +1255,7 @@ class _DetailScreenState extends State<DetailScreen> with WidgetsBindingObserver
                             try {
                               await UrlLauncher.launchUrl(link.url);
                             } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              ScaffoldMessenger.of(context).showSnackBar( // ignore: use_build_context_synchronously
                                 const SnackBar(content: Text('Tidak dapat membuka URL')),
                               );
                             }
@@ -1264,7 +1264,7 @@ class _DetailScreenState extends State<DetailScreen> with WidgetsBindingObserver
                       }).toList(),
                     ),
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
@@ -1440,7 +1440,7 @@ class _DetailScreenState extends State<DetailScreen> with WidgetsBindingObserver
                     width: double.infinity,
                     height: 200,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                    errorBuilder: (_, _, _) => Container(
                       height: 200,
                       color: const Color(0xFF102A43),
                       alignment: Alignment.center,

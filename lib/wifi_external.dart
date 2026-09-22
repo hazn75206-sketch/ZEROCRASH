@@ -30,7 +30,7 @@ class _WifiKillerPageState extends State<WifiKillerPage> {
 
   // Gradients
   final LinearGradient purpleGradient = const LinearGradient(
-    colors: [const Color(0xFF102A43), Color(0xFFFFFFFF)],
+    colors: [Color(0xFF102A43), Color(0xFFFFFFFF)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -63,7 +63,7 @@ class _WifiKillerPageState extends State<WifiKillerPage> {
         frequency = "-"; // Not available in network_info_plus
       });
 
-      print("Router IP: $routerIp");
+      debugPrint("Router IP: $routerIp");
     } catch (e) {
       setState(() {
         ssid = ip = frequency = routerIp = "Error";

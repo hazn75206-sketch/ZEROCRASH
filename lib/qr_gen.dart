@@ -80,7 +80,7 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
         text: 'QR Code dari: ${_textController.text}',
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar( // ignore: use_build_context_synchronously
         SnackBar(
           content: Text('Error sharing: $e', style: TextStyle(color: primaryWhite)),
           backgroundColor: primaryPurple, // Diubah ke ungu

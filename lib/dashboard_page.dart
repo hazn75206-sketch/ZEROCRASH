@@ -191,7 +191,7 @@ class _DashboardPageState extends State<DashboardPage>
     if (index == 1) { _showWhatsAppMenu(); return; }
     setState(() {
       _bottomNavIndex = index;
-      if (index == 0) _selectedPage = _buildNewsPage();
+      if (index == 0) { _selectedPage = _buildNewsPage(); }
       else if (index == 2) _selectedPage = InfoPage(sessionKey: sessionKey);
       // ✅ FIX: Hapus parameter username karena ToolsPage tidak menerimanya
       else if (index == 3) _selectedPage = ToolsPage(sessionKey: sessionKey, userRole: role, listDoos: listDoos);
@@ -1221,7 +1221,7 @@ class _NewsMediaState extends State<NewsMedia> {
         if (progress == null) { Future.microtask(() { if (mounted && !_loaded) setState(() => _loaded = true); }); return child; }
         return Container(color: const Color(0xFF0C0800), child: const Center(child: SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFFF8C00)))));
       },
-      errorBuilder: (_, __, ___) => Container(color: const Color(0xFF0C0800), child: const Icon(Icons.broken_image_rounded, color: Color(0xFF3D3529), size: 40)),
+      errorBuilder: (_, _, _) => Container(color: const Color(0xFF0C0800), child: const Icon(Icons.broken_image_rounded, color: Color(0xFF3D3529), size: 40)),
     );
   }
 }

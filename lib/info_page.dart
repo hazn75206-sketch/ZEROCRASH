@@ -669,7 +669,7 @@ class _InfoPageState extends State<InfoPage> with TickerProviderStateMixin {
                   _buildSectionTitle("USER PROTOCOLS"),
                   ...rulesList.asMap().entries
                       .map((e) => _buildRuleCard(e.key, e.value))
-                      .toList(),
+                      ,
                   _buildPenaltyBox(),
                   _buildFooter(),
                 ]),

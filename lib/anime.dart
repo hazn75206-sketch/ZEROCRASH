@@ -398,7 +398,7 @@ class _HomeAnimePageState extends State<HomeAnimePage> {
                     height: 160,
                     width: 120,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                    errorBuilder: (_, _, _) => Container(
                       height: 160,
                       width: 120,
                       color: const Color(0xFF0A1118),
@@ -553,7 +553,7 @@ class _HomeAnimePageState extends State<HomeAnimePage> {
                   width: 80,
                   height: 120,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (_, _, _) => Container(
                     width: 80,
                     height: 120,
                     color: const Color(0xFF102A43),
@@ -720,7 +720,7 @@ class _HomeAnimePageState extends State<HomeAnimePage> {
                   height: 170,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (_, _, _) => Container(
                     height: 170,
                     color: const Color(0xFF0A1118),
                     alignment: Alignment.center,
@@ -782,7 +782,7 @@ class _HomeAnimePageState extends State<HomeAnimePage> {
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
       ),
-      itemBuilder: (_, __) => Shimmer.fromColors(
+      itemBuilder: (_, _) => Shimmer.fromColors(
         baseColor: const Color(0xFF0A1118),
         highlightColor: const Color(0xFF102A43),
         child: Container(
@@ -886,7 +886,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar( // ignore: use_build_context_synchronously
         const SnackBar(content: Text('Could not open URL')),
       );
     }
@@ -1010,7 +1010,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                   height: 200,
                   width: 140,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (_, _, _) => Container(
                     height: 200,
                     width: 140,
                     color: const Color(0xFF0A1118),
@@ -1294,7 +1294,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                               height: 160,
                               width: 120,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(
+                              errorBuilder: (_, _, _) => Container(
                                 height: 160,
                                 width: 120,
                                 color: const Color(0xFF0A1118),
@@ -1628,7 +1628,7 @@ class _AnimeGenrePageState extends State<AnimeGenrePage> {
                   width: 100,
                   height: 140,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (_, _, _) => Container(
                     width: 100,
                     height: 140,
                     color: const Color(0xFF102A43),
@@ -1960,7 +1960,7 @@ class _AnimeSchedulePageState extends State<AnimeSchedulePage> {
                                     width: 120,
                                     height: 160,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => Container(
+                                    errorBuilder: (_, _, _) => Container(
                                       width: 120,
                                       height: 160,
                                       color: const Color(0xFF0A1118),
@@ -3175,7 +3175,7 @@ class _AnimeEpisodePageState extends State<AnimeEpisodePage> with WidgetsBinding
                   height: 140,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (_, _, _) => Container(
                     height: 140,
                     color: const Color(0xFF0A1118),
                     alignment: Alignment.center,
@@ -3327,7 +3327,7 @@ class _AnimeEpisodePageState extends State<AnimeEpisodePage> with WidgetsBinding
                       height: 80,
                       width: 60,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
+                      errorBuilder: (_, _, _) => Container(
                         height: 80,
                         width: 60,
                         color: const Color(0xFF102A43),
