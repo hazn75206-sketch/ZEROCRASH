@@ -252,9 +252,15 @@ async function ytdlpJson(clean) {
   return JSON.parse(stdout);
 }
 function pickVideoUrl(j) {
+  const fmts = (j.formats || []).filter(f => f.url && f.vcodec !== 'none' && f.acodec !== 'none');
+  const mp4 = fmts.filter(f => f.ext === 'mp4').pop();
+  if (mp4) return mp4.url;
+  if (fmts.length) return fmts[fmts.length - 1].url;
   if (j.url) return j.url;
-  if (j.requested_formats && j.requested_formats.length) return j.requested_formats[0].url;
-  if (j.formats && j.formats.length) return j.formats[j.formats.length - 1].url;
+  if (j.requested_formats && j.requested_formats.length) {
+    const p = j.requested_formats.find(f => f.url && f.acodec !== 'none') || j.requested_formats[0];
+    return p.url;
+  }
   return null;
 }
 app.get('/api/d/tiktok', async (req, res) => {
