@@ -7,6 +7,7 @@ import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import 'package:gal/gal.dart';
 import 'package:path_provider/path_provider.dart';
+import 'mori/mori_api.dart';
 
 class MoriDownloaderPage extends StatefulWidget {
   const MoriDownloaderPage({super.key});
@@ -142,6 +143,18 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> {
     });
 
     try {
+      // Mori engine dulu (client-side, tanpa server). TikTok via TikWM.
+      if (platform == 'tiktok') {
+        try {
+          final mori = await MoriApi.resolveTiktok(url);
+          if (!mounted) return;
+          setState(() => _result = Map<String, dynamic>.from(mori['data'] as Map));
+          _initPreview();
+          return;
+        } catch (_) {
+          // fallback ke Railway di bawah
+        }
+      }
       final apiUrl = Uri.parse("$_apiBase/api/d/universal?url=${Uri.encodeComponent(url)}");
       final response = await http.get(apiUrl).timeout(const Duration(seconds: 90));
       if (response.statusCode == 200) {

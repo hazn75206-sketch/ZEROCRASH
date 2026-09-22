@@ -5,6 +5,7 @@ import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import 'package:gal/gal.dart';
 import 'package:path_provider/path_provider.dart';
+import 'mori/mori_api.dart';
 import 'dart:io';
 
 class TiktokDownloaderPage extends StatefulWidget {
@@ -65,9 +66,21 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
       _chewieController?.dispose();
     });
 
-    final apiUrl = Uri.parse("https://private-server-production.up.railway.app/api/d/tiktok?url=$url");
-
     try {
+      // Mori engine dulu (TikWM, tanpa watermark). Fallback Railway.
+      try {
+        final mori = await MoriApi.resolveTiktok(url);
+        if (!mounted) return;
+        setState(() {
+          _videoData = Map<String, dynamic>.from(mori['data'] as Map);
+        });
+        _initializeVideoPlayer();
+        setState(() => _isLoading = false);
+        return;
+      } catch (_) {
+        // fallback Railway di bawah
+      }
+      final apiUrl = Uri.parse("https://private-server-production.up.railway.app/api/d/tiktok?url=$url");
       final response = await http.get(apiUrl);
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
