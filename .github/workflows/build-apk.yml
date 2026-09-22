@@ -39,7 +39,12 @@ jobs:
         run: flutter analyze
 
       - name: Flutter test
-        run: flutter test
+        run: |
+          if [ -d test ] && [ -n "$(ls -A test 2>/dev/null)" ]; then
+            flutter test
+          else
+            echo "No test directory - skipping flutter test (0 tests)"
+          fi
 
       - name: Decode keystore
         env:
