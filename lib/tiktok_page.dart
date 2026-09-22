@@ -95,11 +95,20 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
     }
   }
 
+  static const Map<String, String> _videoHeaders = {
+    'User-Agent': 'Mozilla/5.0 (Linux; Android 13; RMX2189) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+    'Referer': 'https://www.tiktok.com/',
+  };
+
   void _initializeVideoPlayer() {
     if (_videoData?['urls'] != null && _videoData!['urls'].isNotEmpty) {
       final videoUrl = _videoData!['urls'][0];
-      _videoController = VideoPlayerController.networkUrl(Uri.parse(videoUrl))
+      _videoController = VideoPlayerController.networkUrl(
+        Uri.parse(videoUrl),
+        httpHeaders: _videoHeaders,
+      )
         ..initialize().then((_) {
+          if (!mounted) return;
           setState(() {
             _chewieController = ChewieController(
               videoPlayerController: _videoController!,
@@ -114,6 +123,11 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
               ),
             );
           });
+        }).catchError((e) {
+          if (!mounted) return;
+          setState(() {
+            _errorMessage = "Video tidak bisa diputar langsung. Gunakan SHARE VIDEO untuk unduh & putar offline.";
+          });
         });
     }
   }
@@ -123,7 +137,7 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
 
     try {
       final videoUrl = _videoData!['urls'][0];
-      final response = await http.get(Uri.parse(videoUrl));
+      final response = await http.get(Uri.parse(videoUrl), headers: _videoHeaders);
       final tempDir = await getTemporaryDirectory();
       final file = File('${tempDir.path}/tiktok_${DateTime.now().millisecondsSinceEpoch}.mp4');
       await file.writeAsBytes(response.bodyBytes);

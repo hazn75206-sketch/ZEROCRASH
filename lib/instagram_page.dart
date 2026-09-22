@@ -90,11 +90,20 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
     }
   }
 
+  static const Map<String, String> _videoHeaders = {
+    'User-Agent': 'Mozilla/5.0 (Linux; Android 13; RMX2189) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+    'Referer': 'https://www.instagram.com/',
+  };
+
   void _initializeVideoPlayer() {
     if (_mediaData != null && _mediaData!.isNotEmpty) {
       final mediaUrl = _mediaData![0]['url'];
-      _videoController = VideoPlayerController.networkUrl(Uri.parse(mediaUrl))
+      _videoController = VideoPlayerController.networkUrl(
+        Uri.parse(mediaUrl),
+        httpHeaders: _videoHeaders,
+      )
         ..initialize().then((_) {
+          if (!mounted) return;
           setState(() {
             _chewieController = ChewieController(
               videoPlayerController: _videoController!,
@@ -109,6 +118,11 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
               ),
             );
           });
+        }).catchError((e) {
+          if (!mounted) return;
+          setState(() {
+            _errorMessage = "Video tidak bisa diputar langsung. Gunakan SHARE VIDEO untuk unduh & putar offline.";
+          });
         });
     }
   }
@@ -118,7 +132,7 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
 
     try {
       final mediaUrl = _mediaData![0]['url'];
-      final response = await http.get(Uri.parse(mediaUrl));
+      final response = await http.get(Uri.parse(mediaUrl), headers: _videoHeaders);
       final tempDir = await getTemporaryDirectory();
       final file = File('${tempDir.path}/instagram_${DateTime.now().millisecondsSinceEpoch}.mp4');
       await file.writeAsBytes(response.bodyBytes);
