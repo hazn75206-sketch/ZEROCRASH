@@ -342,7 +342,9 @@ app.get('/api/d/universal', async (req, res) => {
   }
   try {
     const clean = String(url).replace(/"/g, '').split(' ')[0].split('\n')[0];
-    const j = await ytdlpJson(clean, 'best[ext=mp4]/best');
+    let j;
+    try { j = await ytdlpJson(clean, 'best[ext=mp4]/best'); }
+    catch (_) { j = await ytdlpJson(clean); }
     const items = [];
     const pushUrl = (u, kind) => { if (u && typeof u === 'string' && u.startsWith('http')) items.push({ url: u, kind: kind || (/(\.jpg|\.jpeg|\.png|\.webp)/i.test(u.split('?')[0]) ? 'photo' : 'video') }); };
     if (j.url) pushUrl(j.url);
