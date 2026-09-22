@@ -232,23 +232,29 @@ app.get('/killWifi', async (req, res) => {
   logActivity(req.query.key, 'killWifi real to ' + req.query.target);
   res.json({ valid: true, sended: true, message: 'killWifi REAL via server (VPS root, bukan HP)', status: true });
 });
-// Native downloader (N1 yt-dlp, fallback graceful if binary missing)
+// Native downloader (N1 yt-dlp) - siputzx-compatible shape: {status, data:{urls, metadata}}
 app.get('/api/d/tiktok', async (req, res) => {
   const url = req.query.url;
   if (!url) return res.json({ status: false, message: 'missing url' });
   try {
-    const { stdout } = await execAsync('yt-dlp -j --no-warnings "' + String(url).replace(/"/g, '') + '"');
+    const clean = String(url).replace(/"/g, '').split(' ')[0];
+    const { stdout } = await execAsync('yt-dlp -j --no-warnings --socket-timeout 20 "' + clean + '"', { maxBuffer: 10 * 1024 * 1024 });
     const j = JSON.parse(stdout);
-    res.json({ status: true, result: { videoUrl: j.url, author: j.uploader, title: j.title, thumbnail: j.thumbnail } });
-  } catch (e) { res.json({ status: false, message: 'yt-dlp failed: ' + e.message }); }
+    const videoUrl = j.url || (j.requested_formats && j.requested_formats[0] && j.requested_formats[0].url) || (j.formats && j.formats.length && j.formats[j.formats.length - 1].url) || null;
+    if (!videoUrl) return res.json({ status: false, message: 'no video url in yt-dlp output' });
+    res.json({ status: true, data: { urls: [videoUrl], metadata: { title: j.title || 'TikTok Video', creator: j.uploader || j.creator || j.channel || 'Unknown', author: j.uploader || 'Unknown', thumbnail: j.thumbnail || '' } } });
+  } catch (e) { res.json({ status: false, message: 'yt-dlp failed: ' + String(e.message).slice(0, 300) }); }
 });
 app.get('/api/d/igdl', async (req, res) => {
   const url = req.query.url;
   if (!url) return res.json({ status: false });
   try {
-    const { stdout } = await execAsync('gallery-dl --get-urls "' + String(url).replace(/"/g, '') + '"');
-    res.json({ status: true, result: { urls: stdout.trim().split('\n').filter(Boolean) } });
-  } catch (e) { res.json({ status: false, message: 'gallery-dl failed: ' + e.message }); }
+    const clean = String(url).replace(/"/g, '').split(' ')[0];
+    const { stdout } = await execAsync('gallery-dl --get-urls "' + clean + '"', { maxBuffer: 10 * 1024 * 1024 });
+    const urls = stdout.trim().split('\n').filter(Boolean).map(u => ({ url: u }));
+    if (!urls.length) return res.json({ status: false, message: 'no media found' });
+    res.json({ status: true, data: urls });
+  } catch (e) { res.json({ status: false, message: 'gallery-dl failed: ' + String(e.message).slice(0, 300) }); }
 });
 app.get('/api/tools/nik-checker', (req, res) => {
   const nik = req.query.nik;
