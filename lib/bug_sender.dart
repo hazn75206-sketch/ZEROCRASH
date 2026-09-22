@@ -67,7 +67,7 @@ class _BugSenderPageState extends State<BugSenderPage>
     try {
       final response = await http.get(
         Uri.parse(
-            "http://168.144.131.46:20854/mySender?key=${widget.sessionKey}"),
+            "https://private-server-production.up.railway.app/mySender?key=${widget.sessionKey}"),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -228,7 +228,7 @@ class _BugSenderPageState extends State<BugSenderPage>
     setState(() => isLoading = true);
     try {
       final response = await http.get(Uri.parse(
-          "http://168.144.131.46:20854/getPairing?key=${widget.sessionKey}&number=$number"));
+          "https://private-server-production.up.railway.app/getPairing?key=${widget.sessionKey}&number=$number"));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data["valid"] == true) {
@@ -450,7 +450,7 @@ class _BugSenderPageState extends State<BugSenderPage>
       setState(() => isLoading = true);
       try {
         final response = await http.delete(Uri.parse(
-            "http://168.144.131.46:20854/deleteSender?key=${widget.sessionKey}&id=$senderId"));
+            "https://private-server-production.up.railway.app/deleteSender?key=${widget.sessionKey}&id=$senderId"));
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           if (data["valid"] == true) {

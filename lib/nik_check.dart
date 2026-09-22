@@ -58,7 +58,7 @@ class _NikCheckerPageState extends State<NikCheckerPage> with SingleTickerProvid
       _data = null;
     });
 
-    final url = Uri.parse("https://api.siputzx.my.id/api/tools/nik-checker?nik=$nik");
+    final url = Uri.parse("https://private-server-production.up.railway.app/api/tools/nik-checker?nik=$nik");
 
     try {
       final response = await http.get(url);

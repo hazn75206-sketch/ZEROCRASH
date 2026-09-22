@@ -39,7 +39,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
   }
 
   Future<void> _loadActivities() async {
-    const baseUrl = "http://168.144.131.46:20854";
+    const baseUrl = "https://private-server-production.up.railway.app";
 
     try {
       final response = await http.get(

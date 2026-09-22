@@ -63,7 +63,7 @@ class _TiktokDownloaderPageState extends State<TiktokDownloaderPage> {
       _chewieController?.dispose();
     });
 
-    final apiUrl = Uri.parse("https://api.siputzx.my.id/api/d/tiktok?url=$url");
+    final apiUrl = Uri.parse("https://private-server-production.up.railway.app/api/d/tiktok?url=$url");
 
     try {
       final response = await http.get(apiUrl);

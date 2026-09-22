@@ -60,7 +60,7 @@ class _OwnerPageState extends State<OwnerPage> {
     setState(() => isLoading = true);
     try {
       final res = await http.get(
-        Uri.parse('http://168.144.131.46:20854/listUsers?key=$sessionKey'),
+        Uri.parse('https://private-server-production.up.railway.app/listUsers?key=$sessionKey'),
       );
       final data = jsonDecode(res.body);
       if (data['valid'] == true && data['authorized'] == true) {
@@ -110,7 +110,7 @@ class _OwnerPageState extends State<OwnerPage> {
     setState(() => isLoading = true);
     try {
       final res = await http.get(
-        Uri.parse('http://168.144.131.46:20854/deleteUser?key=$sessionKey&username=$username'),
+        Uri.parse('https://private-server-production.up.railway.app/deleteUser?key=$sessionKey&username=$username'),
       );
       final data = jsonDecode(res.body);
 
@@ -141,7 +141,7 @@ class _OwnerPageState extends State<OwnerPage> {
     setState(() => isLoading = true);
     try {
       final url = Uri.parse(
-        'http://168.144.131.46:20854/userAdd?key=$sessionKey&username=$u&password=$p&day=$d&role=$newUserRole',
+        'https://private-server-production.up.railway.app/userAdd?key=$sessionKey&username=$u&password=$p&day=$d&role=$newUserRole',
       );
       final res = await http.get(url);
       final data = jsonDecode(res.body);
@@ -175,7 +175,7 @@ class _OwnerPageState extends State<OwnerPage> {
     setState(() => isLoading = true);
     try {
       final url = Uri.parse(
-        'http://168.144.131.46:20854/editUser?key=$sessionKey&username=$u&addDays=$d',
+        'https://private-server-production.up.railway.app/editUser?key=$sessionKey&username=$u&addDays=$d',
       );
       final res = await http.get(url);
       final data = jsonDecode(res.body);

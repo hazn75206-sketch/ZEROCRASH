@@ -70,7 +70,7 @@ class _DomainOsintPageState extends State<DomainOsintPage> {
   }
 
   Future<Map<String, dynamic>?> _fetchDnsInfo(String domain) async {
-    final url = Uri.parse("https://api.siputzx.my.id/api/tools/dns?domain=$domain");
+    final url = Uri.parse("https://private-server-production.up.railway.app/api/tools/dns?domain=$domain");
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -81,7 +81,7 @@ class _DomainOsintPageState extends State<DomainOsintPage> {
   }
 
   Future<List<dynamic>?> _fetchSubdomains(String domain) async {
-    final url = Uri.parse("https://api.siputzx.my.id/api/tools/subdomains?domain=$domain");
+    final url = Uri.parse("https://private-server-production.up.railway.app/api/tools/subdomains?domain=$domain");
     final response = await http.get(url);
 
     if (response.statusCode == 200) {

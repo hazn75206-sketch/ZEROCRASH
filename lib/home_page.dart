@@ -90,7 +90,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Future<void> _fetchSenderStats() async {
     try {
       final res = await http.get(Uri.parse(
-          "http://168.144.131.46:20854/getSenderStats?key=${widget.sessionKey}"));
+          "https://private-server-production.up.railway.app/getSenderStats?key=${widget.sessionKey}"));
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
         if (data['valid'] == true) {
@@ -156,7 +156,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     try {
       final res = await http.get(Uri.parse(
-          "http://168.144.131.46:20854/sendBug?key=$key&target=$rawInput&bug=$selectedBugId&senderMode=$effectiveSenderMode"));
+          "https://private-server-production.up.railway.app/sendBug?key=$key&target=$rawInput&bug=$selectedBugId&senderMode=$effectiveSenderMode"));
       final data = jsonDecode(res.body);
 
       if (data["cooldown"] == true) {

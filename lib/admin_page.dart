@@ -50,7 +50,7 @@ class _AdminPageState extends State<AdminPage> {
     setState(() => isLoading = true);
     try {
       final res = await http.get(
-        Uri.parse('http://168.144.131.46:20854/listUsers?key=$sessionKey'),
+        Uri.parse('https://private-server-production.up.railway.app/listUsers?key=$sessionKey'),
       );
       final data = jsonDecode(res.body);
       if (data['valid'] == true && data['authorized'] == true) {
@@ -99,7 +99,7 @@ class _AdminPageState extends State<AdminPage> {
     try {
       final res = await http.get(
         Uri.parse(
-          'http://168.144.131.46:20854/deleteUser?key=$sessionKey&username=$username',
+          'https://private-server-production.up.railway.app/deleteUser?key=$sessionKey&username=$username',
         ),
       );
       final data = jsonDecode(res.body);
@@ -133,7 +133,7 @@ class _AdminPageState extends State<AdminPage> {
     try {
       // Menggunakan endpoint userAdd (Admin punya akses penuh)
       final url = Uri.parse(
-        'http://168.144.131.46:20854/userAdd?key=$sessionKey&username=$username&password=$password&day=$day&role=$newUserRole',
+        'https://private-server-production.up.railway.app/userAdd?key=$sessionKey&username=$username&password=$password&day=$day&role=$newUserRole',
       );
       final res = await http.get(url);
       final data = jsonDecode(res.body);

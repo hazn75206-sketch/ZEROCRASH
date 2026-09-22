@@ -58,7 +58,7 @@ class _InstagramDownloaderPageState extends State<InstagramDownloaderPage> {
     });
 
     final encodedUrl = Uri.encodeComponent(url);
-    final apiUrl = Uri.parse("https://api.siputzx.my.id/api/d/igdl?url=$encodedUrl");
+    final apiUrl = Uri.parse("https://private-server-production.up.railway.app/api/d/igdl?url=$encodedUrl");
 
     try {
       final response = await http.get(apiUrl);

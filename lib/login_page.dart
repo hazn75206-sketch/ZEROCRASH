@@ -9,7 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'video_splash_page.dart';
 
 // Firebase Auth+Firestore - Vercel baseUrl deprecated, use Firebase
-const String baseUrl = "http://168.144.131.46:20854";
+const String baseUrl = "https://private-server-production.up.railway.app";
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

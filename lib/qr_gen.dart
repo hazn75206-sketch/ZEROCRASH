@@ -43,7 +43,7 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
     });
 
     final encodedText = Uri.encodeComponent(text);
-    final url = Uri.parse("https://api.siputzx.my.id/api/tools/text2qr?text=$encodedText");
+    final url = Uri.parse("https://private-server-production.up.railway.app/api/tools/text2qr?text=$encodedText");
 
     try {
       final response = await http.get(url);
