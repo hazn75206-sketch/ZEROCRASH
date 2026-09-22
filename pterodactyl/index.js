@@ -250,11 +250,15 @@ app.get('/api/d/igdl', async (req, res) => {
   if (!url) return res.json({ status: false });
   try {
     const clean = String(url).replace(/"/g, '').split(' ')[0];
-    const { stdout } = await execAsync('gallery-dl --get-urls "' + clean + '"', { maxBuffer: 10 * 1024 * 1024 });
-    const urls = stdout.trim().split('\n').filter(Boolean).map(u => ({ url: u }));
+    const { stdout } = await execAsync('yt-dlp -j --no-warnings --socket-timeout 20 "' + clean + '"', { maxBuffer: 10 * 1024 * 1024 });
+    const j = JSON.parse(stdout);
+    const urls = [];
+    if (j.url) urls.push({ url: j.url });
+    else if (j.entries && j.entries.length) { j.entries.forEach(e => { if (e && e.url) urls.push({ url: e.url }); }); }
+    else if (j.requested_formats) { j.requested_formats.forEach(f => { if (f.url) urls.push({ url: f.url }); }); }
     if (!urls.length) return res.json({ status: false, message: 'no media found' });
     res.json({ status: true, data: urls });
-  } catch (e) { res.json({ status: false, message: 'gallery-dl failed: ' + String(e.message).slice(0, 300) }); }
+  } catch (e) { res.json({ status: false, message: 'yt-dlp ig failed: ' + String(e.message).slice(0, 300) }); }
 });
 app.get('/api/tools/nik-checker', (req, res) => {
   const nik = req.query.nik;
