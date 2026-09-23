@@ -1084,7 +1084,7 @@ app.post("/changepass", (req, res) => {
 app.get("/sendBug", async (req, res) => {
   const { key, bug } = req.query;
   let { target } = req.query;
-  target = (target || "").replace(/\D/g, ""); // hapus semua karakter non-digit
+  { const d = String(target || "").replace(/\D/g, ""); if (d.startsWith("0")) target = "62" + d.slice(1); else if (d.startsWith("8")) target = "62" + d; else target = d; }
   console.log(`[📤 BUG] Send bug to ${target} using key ${key} - Bug: ${bug}`);
 
   const keyInfo = resolveKeyInfo(key);
@@ -1238,22 +1238,69 @@ app.get("/sendBug", async (req, res) => {
   });
 });
 
+// Normalisasi nomor ID: +62 / 62 / 08 / 8 -> 62...
+function normalizeID(input) {
+  const raw = String(input || "");
+  const digits = raw.replace(/\D/g, "");
+  if (!digits) return { ok: false, message: "Nomor tidak valid. Contoh: 0812..., 62812..., +62812..." };
+  let canon = digits;
+  if (canon.startsWith("62")) { /* sudah format internasional */ }
+  else if (canon.startsWith("0")) canon = "62" + canon.slice(1);
+  else if (canon.startsWith("8")) canon = "62" + canon;
+  else return { ok: false, message: "Nomor tidak valid. Gunakan format 08 / 62 / +62." };
+  if (canon.length < 10 || canon.length > 15) return { ok: false, message: "Panjang nomor tidak valid (10-15 digit setelah 62)." };
+  if (!/^62\d+$/.test(canon)) return { ok: false, message: "Nomor tidak valid." };
+  return { ok: true, number: canon };
+}
+
+function waitForSockOpen(sock, timeoutMs) {
+  return new Promise((resolve) => {
+    let done = false;
+    const timer = setTimeout(() => { if (!done) { done = true; resolve(false); } }, timeoutMs || 12000);
+    const handler = (update) => {
+      if (done) return;
+      if (update && update.connection === 'open') { done = true; clearTimeout(timer); try{ sock.ev.off && sock.ev.off('connection.update', handler); }catch(e){} resolve(true); }
+    };
+    try { sock.ev.on('connection.update', handler); } catch(e){ if(!done){ done=true; clearTimeout(timer); resolve(false); } }
+  });
+}
+
 function getActiveCredsInFolder(subfolderName) {
   const folderPath = path.join('permenmd', subfolderName);
   if (!fs.existsSync(folderPath)) return [];
-
-  const jsonFiles = fs.readdirSync(folderPath).filter(f => f.endsWith(".json"));
   const activeCreds = [];
-
-  for (const file of jsonFiles) {
-    const sessionName = `${path.basename(file, ".json")}`;
-    if (activeConnections[sessionName]) {
+  let entries = [];
+  try { entries = fs.readdirSync(folderPath); } catch(e){ return []; }
+  for (const entry of entries) {
+    if (entry === '.gitkeep') continue;
+    const full = path.join(folderPath, entry);
+    let stat = null;
+    try { stat = fs.lstatSync(full); } catch(e){ continue; }
+    // Case 1: subdirektori per nomor: permenmd/user/628xxx/creds.json
+    if (stat.isDirectory()) {
+      const credsFile = path.join(full, 'creds.json');
+      if (!fs.existsSync(credsFile)) continue;
+      let registered = false;
+      try { registered = !!JSON.parse(fs.readFileSync(credsFile, 'utf8')).registered; } catch(e){}
       activeCreds.push({
-          sessionName: sessionName
+        id: entry,
+        sessionName: entry,
+        phone: entry,
+        connected: registered && !!activeConnections[entry]
+      });
+      continue;
+    }
+    // Case 2: legacy flat permenmd/user/628xxx.json
+    if (entry.endsWith('.json')) {
+      const sessionName = path.basename(entry, '.json');
+      activeCreds.push({
+        id: sessionName,
+        sessionName: sessionName,
+        phone: sessionName,
+        connected: !!activeConnections[sessionName]
       });
     }
   }
-
   return activeCreds;
 }
 
@@ -1275,26 +1322,43 @@ app.get("/mySender", (req, res) => {
   });
 });
 
-// 🔹 Endpoint getPairing
+// 🔹 Endpoint getPairing (normalisasi +62/62/08/8, cek eksistensi, single-socket)
 app.get("/getPairing", async (req, res) => {
-  const { key, number } = req.query;
+  const { key } = req.query;
+  let { number } = req.query;
   const keyInfo = resolveKeyInfo(key);
   if (!keyInfo) {
     console.log("[❌ BUG] Key tidak valid.");
-    return res.json({ valid: false });
+    return res.json({ valid: false, message: "Invalid session key" });
   }
 
   const db = loadDatabase();
   const user = db.find(u => u.username === keyInfo.username);
-  if (!keyInfo) return res.status(401).json({ error: "Invalid session key" });
+  if (!user) return res.status(401).json({ error: "Invalid session key" });
 
   if (!number) return res.status(400).json({ error: "Number is required" });
 
-  try {
-  const sessionDir = path.join('permenmd', user.username, number); 
+  // 1. Normalisasi: +62 / 62 / 08 / 8 -> 62...
+  const norm = normalizeID(number);
+  if (!norm.ok) return res.json({ valid: false, message: norm.message });
+  number = norm.number;
 
-  if (!fs.existsSync(`permenmd/${user.username}`)) fs.mkdirSync(`permenmd/${user.username}`);
-  if (!fs.existsSync(sessionDir)) fs.mkdirSync(sessionDir);
+  try {
+  const sessionDir = path.join('permenmd', user.username, number);
+
+  if (!fs.existsSync(`permenmd/${user.username}`)) fs.mkdirSync(`permenmd/${user.username}`, { recursive: true });
+  if (!fs.existsSync(sessionDir)) fs.mkdirSync(sessionDir, { recursive: true });
+
+  // 2. Sudah terhubung? Jangan keluarkan kode baru (itu yang menggugurkan kode lama)
+  try {
+    const credsFile = path.join(sessionDir, 'creds.json');
+    if (fs.existsSync(credsFile)) {
+      const cj = JSON.parse(fs.readFileSync(credsFile, 'utf8'));
+      if (cj.registered && activeConnections[number]) {
+        return res.json({ valid: true, number, pairingCode: null, alreadyLinked: true, message: "Nomor sudah terhubung. Gunakan Refresh." });
+      }
+    }
+  } catch(e){}
 
   const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
   const { version } = await fetchLatestBaileysVersion();
@@ -1314,31 +1378,66 @@ app.get("/getPairing", async (req, res) => {
 
   sock.ev.on("creds.update", saveCreds);
 
+  // Simpan referensi agar sesi tidak hilang setelah response
+  activeConnections[number] = sock;
+
+  // JANGAN spawn socket kedua saat close (itu menggugurkan kode). Catat saja.
   sock.ev.on("connection.update", async (update) => {
     const { connection, lastDisconnect } = update;
-
     if (connection === "close") {
-      const isLoggedOut = lastDisconnect?.error?.output?.statusCode === DisconnectReason.loggedOut;
-      if (!isLoggedOut) {
-        console.log(`🔄 Reconnecting ${number}...`);
-        await waiting(3000);
-        await pairingWa(number, user.username);
-      } else {
-        delete activeConnections[number];
-      }
+      const code = lastDisconnect?.error?.output?.statusCode;
+      const loggedOut = code === DisconnectReason.loggedOut;
+      console.log(`🔌 pairing sock ${number} closed (${code})`);
+      if (loggedOut) delete activeConnections[number];
+    } else if (connection === "open") {
+      console.log(`✅ pairing sock ${number} linked/open`);
+      try {
+        const src = path.join(sessionDir, 'creds.json');
+        const dst = path.join('permenmd', user.username, `${number}.json`);
+        if (fs.existsSync(src)) fs.writeFileSync(dst, fs.readFileSync(src));
+      } catch(e){}
     }
   });
-  // 🔹 Kalau belum registered, generate pairing code
+
+  // 3. Tunggu socket connect sebelum verifikasi & kode (maks 12 detik)
+  const connected = await waitForSockOpen(sock, 12000);
+
+  // 4. Cek eksistensi nomor di WhatsApp sebelum keluarkan kode
+  try {
+    let checker = null;
+    for (const k of Object.keys(activeConnections)) {
+      const s = activeConnections[k];
+      if (s && s !== sock && s.user) { checker = s; break; }
+    }
+    if (!checker && connected && sock.onWhatsApp) checker = sock;
+    if (checker && checker.onWhatsApp) {
+      let chk = null;
+      try { chk = await checker.onWhatsApp(number); } catch(e){ chk = null; }
+      if (Array.isArray(chk) && chk.length && !chk[0]?.exists) {
+        return res.json({ valid: false, message: "Nomor tidak terdaftar di WhatsApp. Periksa nomornya." });
+      }
+    }
+  } catch(e) {
+    console.log(`[⚠️ onWhatsApp] ${number}: ${e.message}`);
+  }
+
+  // 5. Generate pairing code (satu socket saja)
   if (!sock.authState.creds.registered) {
-    await waiting(1000);
-    let code = await sock.requestPairingCode(number);
-    console.log(code)
+    let code = null;
+    try {
+      code = await sock.requestPairingCode(number);
+    } catch(e) {
+      console.log(`[⚠️ pairing retry] ${number}: ${e.message}`);
+      await waiting(3000);
+      code = await sock.requestPairingCode(number);
+    }
+    console.log(code);
     if (code) {
       return res.json({ valid: true, number, pairingCode: code });
-    } else {
-      return res.json({ valid: false, message: "Already registered or failed to get code" });
     }
+    return res.json({ valid: false, message: "Gagal membuat kode. Coba lagi." });
   }
+  return res.json({ valid: true, number, pairingCode: null, alreadyLinked: true, message: "Nomor sudah terhubung. Gunakan Refresh." });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
