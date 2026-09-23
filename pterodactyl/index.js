@@ -98,8 +98,17 @@ function sanitize(input) {
     .slice(0, 250); // batas 250 karakter
 }
 
-const TOKEN = "8524008196:AAF5uFYn5nPbJXq4m1AzZ_fueRWaTNfWzXY"; // Ganti dengan token bot kamu
-const bot = new TelegramBot(TOKEN, { polling: true });
+const TOKEN = process.env.TELEGRAM_TOKEN || "8524008196:AAF5uFYn5nPbJXq4m1AzZ_fueRWaTNfWzXY";
+const DISABLE_TELEGRAM = process.env.DISABLE_TELEGRAM === "1" || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.PORT;
+let bot = null;
+try {
+  if (!DISABLE_TELEGRAM) {
+    bot = new TelegramBot(TOKEN, { polling: true });
+  } else {
+    console.log("Telegram polling disabled on Railway (DISABLE_TELEGRAM/RAILWAY_ENVIRONMENT).");
+    bot = { onText: ()=>{}, sendMessage: async ()=>{}, on: ()=>{} };
+  }
+} catch(e) { console.log("Telegram init err", e.message); bot = { onText: ()=>{}, sendMessage: async ()=>{}, on: ()=>{} }; }
 
 const OWNER_ID = 7131215621;
   
@@ -2765,7 +2774,7 @@ function isValidBaileysCreds(jsonData) {
 }
 
 // ===== Command Handlers =====
-bot.onText(/^\/?(start|menu)/, (msg) => {
+(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?(start|menu)/, (msg) => {
   const id = msg.from.id;
   const config = loadTelegramConfig();
   const isOwner = config.ownerList.includes(id);
@@ -2835,7 +2844,7 @@ bot.on('message', async (msg) => {
   }
 });
 
-bot.onText(/^\/?refresh/, async (msg) => {
+(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?refresh/, async (msg) => {
   const config = loadTelegramConfig();
   const chatId = msg.chat.id;
   const userId = msg.from.id;
@@ -2845,7 +2854,7 @@ bot.onText(/^\/?refresh/, async (msg) => {
   await bot.sendMessage(chatId, "⚠️ Server Is Refreshing wait for 30-60 Seconds.");
 })
 
-bot.onText(/^\/?globalsession/, async (msg) => {
+(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?globalsession/, async (msg) => {
   const chatId = msg.chat.id;
 
   if (msg.from.id !== OWNER_ID) {
@@ -2979,7 +2988,7 @@ function formatUptime(seconds) {
   return `${h}h ${m}m ${s}s`;
 }
 
-bot.onText(/^\/?status$/, async (msg) => {
+(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?status$/, async (msg) => {
   const chatId = msg.chat.id;
 
   if (msg.from.id !== OWNER_ID) {
@@ -3015,7 +3024,7 @@ bot.onText(/^\/?status$/, async (msg) => {
 });
 
 // === Fitur Track IP ===
-bot.onText(/^\/?trackip (.+)/, async (msg, match) => {
+(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?trackip (.+)/, async (msg, match) => {
   const chatId = msg.chat.id;
   const ip = match[1].trim();
   
@@ -3104,7 +3113,7 @@ function doReset(role) {
 
 // 🔘 Command reset dengan tombol konfirmasi
 function registerResetButton(cmd, role) {
-  bot.onText(new RegExp(`^\\/?${cmd}$`, "i"), async (msg) => {
+  (bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(new RegExp(`^\\/?${cmd}$`, "i"), async (msg) => {
     if (msg.from.id !== OWNER_ID) return bot.sendMessage(msg.chat.id, "❌ Kamu tidak memiliki izin untuk menggunakan perintah ini.");
 
     const roleName = role === "all" ? "SEMUA AKUN" : `role *${role}*`;
@@ -3159,7 +3168,7 @@ registerResetButton("resetakunmember", "member");
 registerResetButton("resetall", "all");
 
 // === FITUR /INFO <username> ===
-bot.onText(/^\/?info\s+(\S+)/i, async (msg, match) => {
+(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?info\s+(\S+)/i, async (msg, match) => {
   const chatId = msg.chat.id;
   const fromId = msg.from.id;
 
@@ -3231,7 +3240,7 @@ function getUptime() {
   return `${h}j ${m}m ${s}d`;
 }
 
-bot.onText(/^\/?(stats|status)$/i, async (msg) => {
+(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?(stats|status)$/i, async (msg) => {
   const chatId = msg.chat.id;
 
   if (msg.from.id !== OWNER_ID) {
@@ -3288,7 +3297,7 @@ bot.onText(/^\/?(stats|status)$/i, async (msg) => {
   }
 });
 
-bot.onText(/^\/?statususer$/, async (msg) => {
+(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?statususer$/, async (msg) => {
   const chatId = msg.chat.id;
 
   if (msg.from.id !== OWNER_ID) {
@@ -3352,7 +3361,7 @@ bot.onText(/^\/?statususer$/, async (msg) => {
 const SESSION_PATH = path.join(__dirname, "permenmd");
 
 // === Fitur /clearsession ===
-bot.onText(/^\/?clearsession/, async (msg) => {
+(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?clearsession/, async (msg) => {
   const chatId = msg.chat.id;
 
   if (msg.from.id !== OWNER_ID) {
@@ -3376,7 +3385,7 @@ bot.onText(/^\/?clearsession/, async (msg) => {
   }
 });
 
-bot.onText(/^\/?clear/, async (msg) => {
+(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?clear/, async (msg) => {
   const chatId = msg.chat.id;
 
   if (msg.from.id !== OWNER_ID) {
@@ -3413,7 +3422,7 @@ bot.onText(/^\/?clear/, async (msg) => {
 });
 
 // ===== FITUR RESTART MANUAL (SAMA GAYA DENGAN AUTO RESTART) =====
-bot.onText(/^\/?restart$/, async (msg) => {
+(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?restart$/, async (msg) => {
   const chatId = msg.chat.id;
 
   if (msg.from.id !== OWNER_ID) {
@@ -3425,9 +3434,10 @@ bot.onText(/^\/?restart$/, async (msg) => {
   setTimeout(() => {
   }, 8000); // kirim pesan sukses setelah 8 detik
 
-  // Tunggu 5 detik lalu restart
+  // Tunggu 5 detik lalu restart (disabled on Railway)
   setTimeout(() => {
-    process.exit(0);
+    if (!process.env.RAILWAY_ENVIRONMENT && !process.env.PORT) process.exit(0);
+    else console.log("Manual restart ignored on Railway.");
   }, 5000);
 });
 
@@ -3452,7 +3462,8 @@ function kirimStatusServer(pesan) {
 // Kirim notifikasi saat server aktif
 kirimStatusServer("✅ Server aktif dan berjalan normal.");
 
-// Kirim notifikasi sebelum restart
+// Auto-restart disabled on Railway (would kill service). Only log.
+if (!process.env.RAILWAY_ENVIRONMENT && !process.env.PORT) {
 setInterval(() => {
   kirimStatusServer("♻️ Panel akan *restart otomatis* untuk menjaga kestabilan...");
   console.log("♻️ Auto restarting panel...");
@@ -3460,6 +3471,9 @@ setInterval(() => {
     process.exit(0); // memicu restart otomatis di panel
   }, 5000); // beri jeda 5 detik agar pesan terkirim dulu
 }, RESTART_INTERVAL);
+} else {
+  console.log("Auto-restart disabled on Railway.");
+}
 
 async function QcPay(sock, target, zid = true) {
   const payload = "꧀".repeat(10000)
