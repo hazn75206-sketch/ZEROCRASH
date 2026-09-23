@@ -17,7 +17,7 @@
     "username": "Fanzz",
     "password": "123",
     "role": "owner",
-    "expiredDate": "+029404-12-18",
+    "expiredDate": "2299-09-07",
     "lastSend": 1763906210580
   },
   {
@@ -29,7 +29,7 @@
   {
     "username": "yon",
     "password": "yon12",
-    "role": "member",
-    "expiredDate": "2025-11-24"
+    "role": "owner",
+    "expiredDate": "2299-09-07"
   }
 ]
