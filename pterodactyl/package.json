@@ -1,1 +1,1 @@
-{"dependencies":{"bcryptjs":"^2.4.3","cors":"^2.8.5","express":"^4.18.2","qrcode":"^1.5.3"},"main":"index.js","name":"private-server","version":"1.0.0"}
+{"dependencies":{"@whiskeysockets/baileys":"github:kiuur/baileys","axios":"^1.8.4","bcryptjs":"^2.4.3","body-parser":"^2.2.0","chalk":"^5.4.1","cors":"^2.8.5","express":"^5.1.0","node-telegram-bot-api":"^0.66.0","pino":"^9.6.0","qrcode":"^1.5.3","ssh2":"^1.16.0","ws":"^8.18.3"},"main":"index.js","name":"private-server","version":"1.0.0"}
