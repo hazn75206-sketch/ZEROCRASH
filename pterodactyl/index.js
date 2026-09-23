@@ -1424,16 +1424,27 @@ app.get("/getPairing", async (req, res) => {
   // 5. Generate pairing code (satu socket saja)
   if (!sock.authState.creds.registered) {
     let code = null;
+    let lastErr = null;
     try {
       code = await sock.requestPairingCode(number);
     } catch(e) {
+      lastErr = e;
       console.log(`[⚠️ pairing retry] ${number}: ${e.message}`);
-      await waiting(3000);
-      code = await sock.requestPairingCode(number);
+      await waiting(5000);
+      try {
+        code = await sock.requestPairingCode(number);
+      } catch(e2) {
+        lastErr = e2;
+        console.log(`[⚠️ pairing retry2] ${number}: ${e2.message}`);
+      }
     }
-    console.log(code);
     if (code) {
+      console.log(code);
       return res.json({ valid: true, number, pairingCode: code });
+    }
+    const msg = String(lastErr && lastErr.message || "");
+    if (/closed|connect|timeout|network|socket/i.test(msg)) {
+      return res.json({ valid: false, message: "Koneksi server ke WhatsApp terputus. Tunggu 30 detik lalu coba lagi (jangan spam request)." });
     }
     return res.json({ valid: false, message: "Gagal membuat kode. Coba lagi." });
   }
