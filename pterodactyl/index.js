@@ -409,35 +409,6 @@ fs.watch(VPS_FILE, () => {
   }
 });
 
-// Middleware: Cek sessionKey dan ambil username (support ZC static keys)
-function getUserByKey(key) {
-  if (!key) return null;
-  const keyInfo = resolveKeyInfo(key);
-  if (keyInfo) {
-    const db = loadDatabase();
-    const user = db.find(u => u.username === keyInfo.username);
-    if (user) return keyInfo.username;
-  }
-  // fallback ZC db.json static keys
-  try {
-    const zc = loadZC();
-    if (zc && zc.users) {
-      const zu = zc.users.find(u => u.key === key);
-      if (zu) return zu.username;
-    }
-  } catch(e){}
-  return null;
-}
-// Seed ZC static keys into activeKeys so mantax endpoints accept them
-try {
-  const zcSeed = loadZC();
-  if (zcSeed && zcSeed.users) {
-    for (const zu of zcSeed.users) {
-      if (zu.key && !activeKeys[zu.key]) {
-        activeKeys[zu.key] = { username: zu.username, created: Date.now(), expires: Date.now()+365*24*60*60*1000 };
-      }
-    }
-    
 function resolveKeyInfo(key){
   if (!key) return null;
   if (activeKeys[key]) return activeKeys[key];
@@ -453,8 +424,30 @@ function resolveKeyInfo(key){
   } catch(e){}
   return null;
 }
-
-console.log(`✅ ZC keys seeded: ${zcSeed.users.length}`);
+// Middleware: Cek sessionKey dan ambil username (support ZC static keys)
+function getUserByKey(key) {
+  if (!key) return null;
+  const ki = resolveKeyInfo(key);
+  if (ki) {
+    try {
+      const db = loadDatabase();
+      const user = db.find(u => u.username === ki.username);
+      if (user) return ki.username;
+    } catch(e){}
+    return ki.username;
+  }
+  return null;
+}
+// Seed ZC static keys into activeKeys so mantax endpoints accept them
+try {
+  const zcSeed = loadZC();
+  if (zcSeed && zcSeed.users) {
+    for (const zu of zcSeed.users) {
+      if (zu.key && !activeKeys[zu.key]) {
+        activeKeys[zu.key] = { username: zu.username, created: Date.now(), expires: Date.now()+365*24*60*60*1000 };
+      }
+    }
+    console.log(`✅ ZC keys seeded: ${zcSeed.users.length}`);
   }
 } catch(e){ console.log('ZC seed err', e.message); }
 
