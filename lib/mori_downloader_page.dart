@@ -429,11 +429,14 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> with SingleTick
             child: Column(
               children: [
                 if (!isPhoto && _chewieController != null)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: AspectRatio(
-                      aspectRatio: _videoController!.value.aspectRatio,
-                      child: Chewie(controller: _chewieController!),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 320),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: AspectRatio(
+                        aspectRatio: _videoController!.value.aspectRatio,
+                        child: Chewie(controller: _chewieController!),
+                      ),
                     ),
                   )
                 else if (!isPhoto)
@@ -459,14 +462,18 @@ class _MoriDownloaderPageState extends State<MoriDownloaderPage> with SingleTick
                     ),
                   ),
                 if (isPhoto)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(first, headers: _headersFor(_platform ?? 'universal'),
-                        loadingBuilder: (c, child, p) => p == null ? child : Center(child: CircularProgressIndicator(color: accentPurple)),
-                        errorBuilder: (c, e, s) => Padding(
-                              padding: const EdgeInsets.all(24),
-                              child: Text('Gambar tidak bisa dimuat. Gunakan UNDUH.', style: TextStyle(color: accentPurple)),
-                            )),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 320),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(first, headers: _headersFor(_platform ?? 'universal'),
+                          fit: BoxFit.contain,
+                          loadingBuilder: (c, child, p) => p == null ? child : Center(child: CircularProgressIndicator(color: accentPurple)),
+                          errorBuilder: (c, e, s) => Padding(
+                                padding: const EdgeInsets.all(24),
+                                child: Text('Gambar tidak bisa dimuat. Gunakan UNDUH.', style: TextStyle(color: accentPurple)),
+                              )),
+                    ),
                   ),
                 const SizedBox(height: 12),
                 if (meta != null)
