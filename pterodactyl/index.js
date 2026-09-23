@@ -2884,7 +2884,7 @@ function isValidBaileysCreds(jsonData) {
 }
 
 // ===== Command Handlers =====
-(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?(start|menu)/, (msg) => {
+;(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?(start|menu)/, (msg) => {
   const id = msg.from.id;
   const config = loadTelegramConfig();
   const isOwner = config.ownerList.includes(id);
@@ -2954,7 +2954,7 @@ bot.on('message', async (msg) => {
   }
 });
 
-(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?refresh/, async (msg) => {
+;(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?refresh/, async (msg) => {
   const config = loadTelegramConfig();
   const chatId = msg.chat.id;
   const userId = msg.from.id;
@@ -2964,7 +2964,7 @@ bot.on('message', async (msg) => {
   await bot.sendMessage(chatId, "⚠️ Server Is Refreshing wait for 30-60 Seconds.");
 })
 
-(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?globalsession/, async (msg) => {
+;(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?globalsession/, async (msg) => {
   const chatId = msg.chat.id;
 
   if (msg.from.id !== OWNER_ID) {
@@ -3098,7 +3098,7 @@ function formatUptime(seconds) {
   return `${h}h ${m}m ${s}s`;
 }
 
-(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?status$/, async (msg) => {
+;(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?status$/, async (msg) => {
   const chatId = msg.chat.id;
 
   if (msg.from.id !== OWNER_ID) {
@@ -3134,7 +3134,7 @@ function formatUptime(seconds) {
 });
 
 // === Fitur Track IP ===
-(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?trackip (.+)/, async (msg, match) => {
+;(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?trackip (.+)/, async (msg, match) => {
   const chatId = msg.chat.id;
   const ip = match[1].trim();
   
@@ -3278,7 +3278,7 @@ registerResetButton("resetakunmember", "member");
 registerResetButton("resetall", "all");
 
 // === FITUR /INFO <username> ===
-(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?info\s+(\S+)/i, async (msg, match) => {
+;(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?info\s+(\S+)/i, async (msg, match) => {
   const chatId = msg.chat.id;
   const fromId = msg.from.id;
 
@@ -3350,7 +3350,7 @@ function getUptime() {
   return `${h}j ${m}m ${s}d`;
 }
 
-(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?(stats|status)$/i, async (msg) => {
+;(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?(stats|status)$/i, async (msg) => {
   const chatId = msg.chat.id;
 
   if (msg.from.id !== OWNER_ID) {
@@ -3407,7 +3407,7 @@ function getUptime() {
   }
 });
 
-(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?statususer$/, async (msg) => {
+;(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?statususer$/, async (msg) => {
   const chatId = msg.chat.id;
 
   if (msg.from.id !== OWNER_ID) {
@@ -3471,7 +3471,7 @@ function getUptime() {
 const SESSION_PATH = path.join(__dirname, "permenmd");
 
 // === Fitur /clearsession ===
-(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?clearsession/, async (msg) => {
+;(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?clearsession/, async (msg) => {
   const chatId = msg.chat.id;
 
   if (msg.from.id !== OWNER_ID) {
@@ -3495,7 +3495,7 @@ const SESSION_PATH = path.join(__dirname, "permenmd");
   }
 });
 
-(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?clear/, async (msg) => {
+;(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?clear/, async (msg) => {
   const chatId = msg.chat.id;
 
   if (msg.from.id !== OWNER_ID) {
@@ -3532,7 +3532,7 @@ const SESSION_PATH = path.join(__dirname, "permenmd");
 });
 
 // ===== FITUR RESTART MANUAL (SAMA GAYA DENGAN AUTO RESTART) =====
-(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?restart$/, async (msg) => {
+;(bot && bot.onText ? bot.onText.bind(bot) : (()=>{}))(/^\/?restart$/, async (msg) => {
   const chatId = msg.chat.id;
 
   if (msg.from.id !== OWNER_ID) {
