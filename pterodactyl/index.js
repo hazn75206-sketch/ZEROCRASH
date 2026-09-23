@@ -1412,6 +1412,17 @@ app.get('/getMyActivity', (req,res)=>{
   res.json({valid:true,result:[],activities:[]});
 });
 
+app.get('/debugFiles', (req,res)=>{
+  try {
+    const files = fs.readdirSync(__dirname);
+    const dbExists = fs.existsSync(path.join(__dirname,'database.json'));
+    const zcExists = fs.existsSync(path.join(__dirname,'db.json'));
+    let dbContent=null, zcContent=null;
+    try{ dbContent=JSON.parse(fs.readFileSync(path.join(__dirname,'database.json'),'utf8')); }catch(e){ dbContent={err:e.message}; }
+    try{ zcContent=JSON.parse(fs.readFileSync(path.join(__dirname,'db.json'),'utf8')); }catch(e){ zcContent={err:e.message}; }
+    res.json({ files, dbExists, zcExists, dbLen: Array.isArray(dbContent)?dbContent.length:0, zcLen: zcContent.users?zcContent.users.length:0, dbSample: Array.isArray(dbContent)?dbContent.slice(0,1):dbContent });
+  } catch(e){ res.json({err:e.message}); }
+});
 app.get('/ping', (req, res) => {
   res.send('pong');
 });
