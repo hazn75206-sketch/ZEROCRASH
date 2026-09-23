@@ -11,26 +11,48 @@ on:
 permissions:
   contents: write
 
+env:
+  GRADLE_OPTS: -Dorg.gradle.parallel=true -Dorg.gradle.caching=true
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     steps:
-      - name: Checkout
+      - name: Checkout (fetch semua commit untuk versionCode)
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
-      - name: Setup Java 17
+      - name: Show CPU info
+        run: |
+          echo "nproc=$(nproc)"
+          lscpu | head -n 20
+
+      - name: Set up JDK 17
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
           cache: gradle
 
-      - name: Setup Flutter
+      - name: Setup Flutter 3.35.4
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.35.4'
           channel: stable
           cache: true
+
+      - name: Setup Gradle cache
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Tentukan versi Zero Crash (auto naik tiap commit)
+        run: |
+          VERSION_CODE=$(git rev-list --count HEAD)
+          VERSION_NAME="7.5.$VERSION_CODE"
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+          echo "Version: $VERSION_NAME ($VERSION_CODE)"
 
       - name: Flutter pub get
         run: flutter pub get
@@ -65,38 +87,61 @@ jobs:
           cat android/key.properties
 
       - name: Build APK release
-        run: flutter build apk --release --target-platform android-arm64 --build-name=7.5.0 --build-number=${{ github.run_number }}
+        run: flutter build apk --release --target-platform android-arm64 --build-name "${{ env.VERSION_NAME }}" --build-number "${{ env.VERSION_CODE }}"
 
-      - name: Prepare APK for release (direct link)
+      - name: Rename APK (versi di nama file)
         run: |
-          cp build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/ZEROCRASH-v7.5.0-arm64.apk
-          ls -lh build/app/outputs/flutter-apk/
-          # verify only arm64
-          unzip -l build/app/outputs/flutter-apk/app-release.apk | grep "lib/" || true
+          cd build/app/outputs/flutter-apk
+          cp app-release.apk "ZEROCRASH-v${{ env.VERSION_CODE }}-arm64.apk"
+          ls -lh *.apk
+          unzip -l app-release.apk | grep "lib/" || true
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release-apk
-          path: build/app/outputs/flutter-apk/*.apk
-          if-no-files-found: error
+      - name: Write APK link to job summary (klik langsung, bukan zip)
+        run: |
+          echo "## Download APK" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Versi: \`${{ env.VERSION_NAME }}\` (versionCode \`${{ env.VERSION_CODE }}\`)" >> $GITHUB_STEP_SUMMARY
+          echo "Tanggal build: \`$(date -u +%Y-%m-%d' '%H:%M' UTC')\`" >> $GITHUB_STEP_SUMMARY
+          echo "Commit: \`${GITHUB_SHA::7}\` — branch \`${GITHUB_REF_NAME}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "[klik di sini untuk download APK (ZEROCRASH-v${{ env.VERSION_CODE }}-arm64.apk)](https://github.com/${{ github.repository }}/releases/download/apk-build/ZEROCRASH-v${{ env.VERSION_CODE }}-arm64.apk)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Project | Build | APK |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| ZEROCRASH | ${{ env.VERSION_NAME }} (${{ env.VERSION_CODE }}) | ZEROCRASH-v${{ env.VERSION_CODE }}-arm64.apk |" >> $GITHUB_STEP_SUMMARY
+          cat $GITHUB_STEP_SUMMARY
 
-      - name: Create GitHub Release
+      - name: Publish APK as Release asset (direct download, bukan zip Artifact)
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/v')
         with:
-          files: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/flutter-apk/ZEROCRASH-v7.5.0-arm64.apk
-          generate_release_notes: true
-          fail_on_unmatched_files: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: apk-build
+          name: ZEROCRASH APK (arm64)
+          prerelease: true
+          body: |
+            Build otomatis dari `${{ github.sha }}` — `${{ github.event.head_commit.timestamp }}`
 
-      - name: Summary direct download
-        if: always()
+            - Versi: `${{ env.VERSION_NAME }}` (versionCode `${{ env.VERSION_CODE }}` — selalu naik tiap build)
+            - APK: `ZEROCRASH-v${{ env.VERSION_CODE }}-arm64.apk`
+            - Download (klik langsung, bukan zip):
+              - https://github.com/${{ github.repository }}/releases/download/apk-build/ZEROCRASH-v${{ env.VERSION_CODE }}-arm64.apk
+          files: |
+            build/app/outputs/flutter-apk/ZEROCRASH-v${{ env.VERSION_CODE }}-arm64.apk
+          fail_on_unmatched_files: true
+
+  release-tag:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build]
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Buat GitHub Release resmi untuk tag v*
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          echo "### Direct download ready" >> $GITHUB_STEP_SUMMARY
-          echo "- Artifact: app-release-apk (Actions -> Artifacts)" >> $GITHUB_STEP_SUMMARY
-          echo "- APK: ZEROCRASH-v7.5.0-arm64.apk" >> $GITHUB_STEP_SUMMARY
-          ls -lh build/app/outputs/flutter-apk/*.apk >> $GITHUB_STEP_SUMMARY || true
+          TAG="${GITHUB_REF_NAME}"
+          echo "Tag push terdeteksi: $TAG — file apk-build sudah tersedia di https://github.com/${{ github.repository }}/releases/tag/apk-build"
