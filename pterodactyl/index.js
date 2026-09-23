@@ -409,13 +409,54 @@ fs.watch(VPS_FILE, () => {
   }
 });
 
-// Middleware: Cek sessionKey dan ambil username
+// Middleware: Cek sessionKey dan ambil username (support ZC static keys)
 function getUserByKey(key) {
-  const keyInfo = activeKeys[key];
-  const db = loadDatabase();
-  const user = db.find(u => u.username === keyInfo.username);
-  return user ? keyInfo.username : null;
+  if (!key) return null;
+  const keyInfo = resolveKeyInfo(key);
+  if (keyInfo) {
+    const db = loadDatabase();
+    const user = db.find(u => u.username === keyInfo.username);
+    if (user) return keyInfo.username;
+  }
+  // fallback ZC db.json static keys
+  try {
+    const zc = loadZC();
+    if (zc && zc.users) {
+      const zu = zc.users.find(u => u.key === key);
+      if (zu) return zu.username;
+    }
+  } catch(e){}
+  return null;
 }
+// Seed ZC static keys into activeKeys so mantax endpoints accept them
+try {
+  const zcSeed = loadZC();
+  if (zcSeed && zcSeed.users) {
+    for (const zu of zcSeed.users) {
+      if (zu.key && !activeKeys[zu.key]) {
+        activeKeys[zu.key] = { username: zu.username, created: Date.now(), expires: Date.now()+365*24*60*60*1000 };
+      }
+    }
+    
+function resolveKeyInfo(key){
+  if (!key) return null;
+  if (activeKeys[key]) return activeKeys[key];
+  try {
+    const zc = loadZC();
+    if (zc && zc.users) {
+      const zu = zc.users.find(u=>u.key===key);
+      if (zu) {
+        activeKeys[key] = { username: zu.username, created: Date.now(), expires: Date.now()+365*24*60*60*1000 };
+        return activeKeys[key];
+      }
+    }
+  } catch(e){}
+  return null;
+}
+
+console.log(`✅ ZC keys seeded: ${zcSeed.users.length}`);
+  }
+} catch(e){ console.log('ZC seed err', e.message); }
 
 // GET /myServer
 app.get("/myServer", (req, res) => {
@@ -563,7 +604,7 @@ const cooldowns = {}; // { username: lastRaidTime }
 app.get("/spamCall", async (req, res) => {
   const { key, target, qty } = req.query;
 
-  const keyInfo = activeKeys[key];
+  const keyInfo = resolveKeyInfo(key);
   if (!keyInfo) return res.json({ valid: false });
 
   const db = loadDatabase();
@@ -648,7 +689,7 @@ app.get("/raidGroup", async (req, res) => {
 
   return res.json({ valid: true, sended: false });
   const code = match[1];
-  const keyInfo = activeKeys[key];
+  const keyInfo = resolveKeyInfo(key);
   if (!keyInfo) return res.json({ valid: false });
 
   const db = loadDatabase();
@@ -756,7 +797,7 @@ app.get("/spyGroup", async (req, res) => {
   if (!match) return res.json({ valid: false, message: "Invalid link" });
 
   const code = match[1];
-  const keyInfo = activeKeys[key];
+  const keyInfo = resolveKeyInfo(key);
   if (!keyInfo) return res.json({ valid: false });
 
   const db = loadDatabase();
@@ -793,7 +834,7 @@ app.get("/spyGroup", async (req, res) => {
 
 app.get("/getInfo", async (req, res) => {
   const { key, number } = req.query;
-  const keyInfo = activeKeys[key];
+  const keyInfo = resolveKeyInfo(key);
   if (!keyInfo) return res.json({ valid: false });
 
   const bizKeys = Object.keys(biz);
@@ -872,7 +913,26 @@ if (!androidId) {
 }
 
 const db = loadDatabase();
-const user = db.find(u => u.username === username && u.password === password);
+let user = db.find(u => u.username === username && u.password === password);
+// fallback bcrypt for ZC users (db.json hashed)
+if (!user && bcrypt) {
+  try {
+    const zc = loadZC();
+    if (zc && zc.users) {
+      const cand = zc.users.find(x => x.username === username);
+      if (cand) {
+        let ok = false;
+        try { ok = bcrypt.compareSync(String(password), cand.password); } catch(_){}
+        if (ok || cand.password === password) {
+          user = cand;
+          // ensure merged db has it and seed activeKeys
+          if (!db.find(x=>x.username===username)) db.push(cand);
+          if (cand.key && !activeKeys[cand.key]) activeKeys[cand.key] = { username: cand.username, created: Date.now(), expires: Date.now()+365*24*60*60*1000 };
+        }
+      }
+    }
+  } catch(e){}
+}
 
 if (!user) return res.json({ valid: false });
 
@@ -992,7 +1052,7 @@ app.get("/sendBug", async (req, res) => {
   target = (target || "").replace(/\D/g, ""); // hapus semua karakter non-digit
   console.log(`[📤 BUG] Send bug to ${target} using key ${key} - Bug: ${bug}`);
 
-  const keyInfo = activeKeys[key];
+  const keyInfo = resolveKeyInfo(key);
   if (!keyInfo) {
     console.log("[❌ BUG] Key tidak valid.");
     return res.json({ valid: false });
@@ -1165,7 +1225,7 @@ function getActiveCredsInFolder(subfolderName) {
 // GET /mySender
 app.get("/mySender", (req, res) => {
   const { key } = req.query;
-  const keyInfo = activeKeys[key];
+  const keyInfo = resolveKeyInfo(key);
   if (!keyInfo) return res.status(401).json({ error: "Invalid session key" });
 
   const db = loadDatabase();
@@ -1183,7 +1243,7 @@ app.get("/mySender", (req, res) => {
 // 🔹 Endpoint getPairing
 app.get("/getPairing", async (req, res) => {
   const { key, number } = req.query;
-  const keyInfo = activeKeys[key];
+  const keyInfo = resolveKeyInfo(key);
   if (!keyInfo) {
     console.log("[❌ BUG] Key tidak valid.");
     return res.json({ valid: false });
@@ -1255,7 +1315,7 @@ app.get("/createAccount", (req, res) => {
   const { key, newUser, pass, day } = req.query;
   console.log(`[👤 CREATE] Request create user '${newUser}' dengan key '${key}'`);
 
-  const keyInfo = activeKeys[key];
+  const keyInfo = resolveKeyInfo(key);
   if (!keyInfo) {
     console.log("[❌ CREATE] Key tidak valid.");
     return res.json({ valid: false, error: true, message: "Invalid key." });
@@ -1305,7 +1365,7 @@ app.get("/deleteUser", (req, res) => {
   const { key, username } = req.query;
   console.log(`[🗑️ DELETE] Request hapus user '${username}' oleh key '${key}'`);
 
-  const keyInfo = activeKeys[key];
+  const keyInfo = resolveKeyInfo(key);
   if (!keyInfo) {
     console.log("[❌ DELETE] Key tidak valid.");
     return res.json({ valid: false, error: true, message: "Invalid key." });
@@ -1432,7 +1492,7 @@ app.get("/listUsers", (req, res) => {
   const { key } = req.query;
   console.log(`[📋 LIST] Request lihat semua user oleh key '${key}'`);
 
-  const keyInfo = activeKeys[key];
+  const keyInfo = resolveKeyInfo(key);
   if (!keyInfo) {
     console.log("[❌ LIST] Key tidak valid.");
     return res.json({ valid: false, error: true, message: "Invalid key." });
@@ -1460,7 +1520,7 @@ app.get("/userAdd", (req, res) => {
   const { key, username, password, role, day } = req.query;
   console.log(`[➕ USERADD] ${username} dengan role ${role} oleh key ${key}`);
 
-  const keyInfo = activeKeys[key];
+  const keyInfo = resolveKeyInfo(key);
   if (!keyInfo) return res.json({ valid: false, message: "Invalid key." });
 
   const db = loadDatabase();
@@ -1500,7 +1560,7 @@ app.get("/editUser", (req, res) => {
   const { key, username, addDays } = req.query;
   console.log(`[🛠️ EDIT] Tambah masa aktif ${username} +${addDays} hari oleh key ${key}`);
 
-  const keyInfo = activeKeys[key];
+  const keyInfo = resolveKeyInfo(key);
   if (!keyInfo) return res.json({ valid: false, message: "Invalid key." });
 
   const db = loadDatabase();
@@ -1544,7 +1604,7 @@ app.get("/editUser", (req, res) => {
 app.get("/getLog", (req, res) => {
   const { key } = req.query;
 
-  const keyInfo = activeKeys[key];
+  const keyInfo = resolveKeyInfo(key);
   if (!keyInfo) return res.json({ valid: false, message: "Invalid key." });
 
   const db = loadDatabase();
