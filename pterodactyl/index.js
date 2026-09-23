@@ -897,8 +897,41 @@ function recordKey({ username, key, role, ip, androidId }) {
     }
   ];
 
+// ===== Backward-compat: 188 server style POST /validate {type,key,androidId} and POST /stats =====
+app.post("/stats", (req, res) => {
+  try {
+    const onlineUsers = Object.keys(activeKeys).length;
+    let activeConnections = 0;
+    try { activeConnections = Object.keys(vpsConnections||{}).length; } catch(e){}
+    return res.json({ type: "stats", onlineUsers, activeConnections });
+  } catch(e){ return res.json({ type: "stats", onlineUsers: 0, activeConnections: 0 }); }
+});
 // ===== Endpoint: Login & Key Fetch (version 3.0 required) =====
 app.post("/validate", (req, res) => {
+  // 188 compat: {type:"validate",key,androidId}
+  try {
+    const btype = req.body && req.body.type;
+    if (btype === "validate" && req.body.key) {
+      const k = req.body.key;
+      const aid = req.body.androidId;
+      const ki = (typeof resolveKeyInfo === 'function' ? resolveKeyInfo(k) : activeKeys[k]);
+      if (!ki) return res.json({ type: "myInfo", valid: false, reason: "keyInvalid" });
+      // check device via keyList if present
+      try {
+        const kl = loadKeyList();
+        const sess = kl.find(e=>e.sessionKey===k);
+        if (sess && aid && sess.androidId && sess.androidId !== aid) {
+          return res.json({ type: "myInfo", valid: false, reason: "androidIdMismatch" });
+        }
+      } catch(e){}
+      return res.json({ type: "myInfo", valid: true });
+    }
+    if (btype === "stats") {
+      const onlineUsers = Object.keys(activeKeys).length;
+      return res.json({ type: "stats", onlineUsers, activeConnections: 0 });
+    }
+  } catch(e){}
+
 const { username, password, version, androidId } = req.body;
 
 if (!androidId) {
