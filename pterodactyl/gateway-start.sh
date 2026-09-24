@@ -1,0 +1,1 @@
+#!/bin/bash\ncd "$(dirname "$0")"\nif [ ! -d node_modules ]; then npm install --omit=dev; fi\nPETRO_KEY="$PETRO_KEY" PORT="$PORT" node gateway-wa.js\n

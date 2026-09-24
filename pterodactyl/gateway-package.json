@@ -1,0 +1,1 @@
+{"dependencies":{"@whiskeysockets/baileys":"github:kiuur/baileys","axios":"^1.8.4","cors":"^2.8.5","express":"^5.1.0","pino":"^9.6.0"},"main":"gateway-wa.js","name":"petro-gateway","version":"1.0.0"}
