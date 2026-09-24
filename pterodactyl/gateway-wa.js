@@ -558,6 +558,19 @@ app.get("/mySender", auth, (req, res) => {
   res.json({ valid: true, connections: conns, result: conns });
 });
 
+app.get("/deleteSender", auth, (req, res) => {
+  const user = String(req.query.user || "");
+  const id = String(req.query.id || "");
+  if (!user || !id) return res.json({ valid: false, message: "missing user/id" });
+  try {
+    const dir = path.join("permenmd", user, id);
+    if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
+    try { if (fs.existsSync(path.join("permenmd", user, `${id}.json`))) fs.unlinkSync(path.join("permenmd", user, `${id}.json`)); } catch(e){}
+    delete activeConnections[id];
+    res.json({ valid: true, deleted: true });
+  } catch (e) { res.json({ valid: false, message: e.message }); }
+});
+
 app.get("/getSenderStats", auth, (req, res) => {
   const user = String(req.query.user || "");
   const mine = senderList(user).filter(c => c.connected).length;

