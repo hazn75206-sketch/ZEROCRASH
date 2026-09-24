@@ -563,6 +563,10 @@ function loadZC() {
   } catch(e){}
   return null;
 }
+function loadRawDB(){ try{ if(!fs.existsSync(DB_PATH)) return []; return JSON.parse(fs.readFileSync(DB_PATH,'utf8')); }catch(e){return [];} }
+function loadRawZC(){ try{ if(!fs.existsSync(ZC_DB_FILE)) return {users:[]}; const j=JSON.parse(fs.readFileSync(ZC_DB_FILE,'utf8')); return j; }catch(e){ return {users:[]}; } }
+function saveRawDB(arr){ try{ fs.writeFileSync(DB_PATH, JSON.stringify(arr,null,2)); }catch(e){} }
+function saveRawZC(obj){ try{ fs.writeFileSync(ZC_DB_FILE, JSON.stringify(obj,null,2)); }catch(e){} }
 const _origLoadDatabase = loadDatabase;
 loadDatabase = function() {
   const data = _origLoadDatabase();
@@ -1531,8 +1535,18 @@ app.get("/deleteUser", (req, res) => {
   }
 
   const deletedUser = db[index];
-  db.splice(index, 1);
-  saveDatabase(db);
+  // store-aware: hapus dari file asal (database.json vs db.json)
+  try {
+    const rawDB = loadRawDB();
+    const rawZC = loadRawZC();
+    const inDB = rawDB.some(u=>u.username===username);
+    const inZC = rawZC.users && rawZC.users.some(u=>u.username===username);
+    if (inDB) { const arr = rawDB.filter(u=>u.username!==username); saveRawDB(arr); }
+    if (inZC) { rawZC.users = rawZC.users.filter(u=>u.username!==username); saveRawZC(rawZC); }
+    if (!inDB && !inZC) { db.splice(index, 1); saveDatabase(db); }
+    else if (inDB && inZC) { /* sudah dihapus dari keduanya, sync memori */ db.splice(index,1); }
+    else { db.splice(index,1); }
+  } catch(e) { db.splice(index, 1); try{ saveDatabase(db);}catch(_){} }
         
   const logLine = `${admin.username} Deleted ${deletedUser}\n`;
   fs.appendFileSync('logUser.txt', logLine);
@@ -1691,8 +1705,9 @@ app.get("/userAdd", (req, res) => {
     expiredDate: expired.toISOString().split("T")[0],
   };
 
-  db.push(newUser);
-  saveDatabase(db);newUser
+  // store-aware: tambah ke db.json (ZC) - default
+  try { const rawZC = loadRawZC(); rawZC.users = rawZC.users || []; rawZC.users.push(newUser); saveRawZC(rawZC); } catch(e){ db.push(newUser); saveDatabase(db); }
+  newUser
     
   const logLine = `${creator.username} Created ${newUser} Role ${role} Days ${day}\n`;
   fs.appendFileSync('logUser.txt', logLine);
@@ -1738,7 +1753,19 @@ app.get("/editUser", (req, res) => {
   currentDate.setDate(currentDate.getDate() + parseInt(addDays));
   targetUser.expiredDate = currentDate.toISOString().split("T")[0];
 
-  saveDatabase(db);
+  // store-aware edit
+  try {
+    const rawDB = loadRawDB();
+    const rawZC = loadRawZC();
+    let touched = false;
+    const wb = rawDB.find(u=>u.username===username);
+    if (wb) { wb.expiredDate = targetUser.expiredDate; if (targetUser.password) wb.password = targetUser.password; saveRawDB(rawDB); touched = true; }
+    if (rawZC.users) {
+      const wz = rawZC.users.find(u=>u.username===username);
+      if (wz) { wz.expiredDate = targetUser.expiredDate; if (targetUser.password) wz.password = targetUser.password; saveRawZC(rawZC); touched = true; }
+    }
+    if (!touched) saveDatabase(db);
+  } catch(e){ saveDatabase(db); }
   const logLine = `${editor.username} Edited ${targetUser} Add Days ${addDays}\n`;
   fs.appendFileSync('logUser.txt', logLine);
   console.log("[✅ EDIT] Masa aktif diperbarui:", targetUser);
