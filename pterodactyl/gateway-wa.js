@@ -602,7 +602,13 @@ app.get("/getPairing", auth, async (req, res) => {
       }
     } catch(e){}
     const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
-    const { version } = await fetchLatestBaileysVersion();
+    let version;
+    if (process.env.BAILEYS_VERSION) {
+      const parts = String(process.env.BAILEYS_VERSION).split(",").map(x => parseInt(x.trim()));
+      if (parts.length === 3 && parts.every(n => !isNaN(n))) version = parts;
+    }
+    if (!version) ({ version } = await fetchLatestBaileysVersion());
+    console.log("WA version:", JSON.stringify(version));
     const sock = makeWASocket({
       keepAliveIntervalMs: 50000, logger: pino({ level: "silent" }), auth: state,
       syncFullHistory: true, markOnlineOnConnect: true, connectTimeoutMs: 60000,
