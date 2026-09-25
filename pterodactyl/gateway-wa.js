@@ -66,6 +66,33 @@ function waitForSockOpen(sock, timeoutMs) {
     try { sock.ev.on("connection.update", handler); } catch(e){ if(!done){ done=true; clearTimeout(timer); resolve(false); } }
   });
 }
+// SATU socket hidup per nomor: tutup yang lama sebelum simpan yang baru
+// (socket ganda pakai kredensial sama = ratchet korup = pesan "Menunggu pesan ini")
+function trackSocket(number, sock) {
+  try {
+    const old = activeConnections[number];
+    if (old && old !== sock) {
+      try { old.end && old.end(undefined); } catch(e){}
+      try { old.ws && old.ws.close && old.ws.close(); } catch(e){}
+    }
+  } catch(e){}
+  activeConnections[number] = sock;
+}
+// Resolusi JID beneran via onWhatsApp (tangani LID vs PN)
+async function resolveJid(sock, number) {
+  const fallback = number + "@s.whatsapp.net";
+  try {
+    if (!sock || !sock.onWhatsApp) return fallback;
+    const chk = await sock.onWhatsApp(number);
+    if (Array.isArray(chk) && chk.length && chk[0]) {
+      if (!chk[0].exists) return null;
+      if (chk[0].jid) return chk[0].jid;
+    } else if (chk && chk.exists && chk.jid) {
+      return chk.jid;
+    }
+    return fallback;
+  } catch(e) { return fallback; }
+}
 // sesi live milik user (scan subdir permenmd/user/<nomor>/creds.json)
 function liveSock(user) {
   const folderPath = path.join("permenmd", user);
@@ -184,7 +211,7 @@ app.get("/getPairing", auth, async (req, res) => {
       browser: ["Ubuntu", "Chrome", "20.0.04"], version
     });
     sock.ev.on("creds.update", saveCreds);
-    activeConnections[number] = sock;
+    trackSocket(number, sock);
     let linkAttempts = 0;
     const tryRelink = async () => {
       // Re-hello pasca-pairing: user sudah input kode, selesaikan login (maks 4x)
@@ -204,7 +231,7 @@ app.get("/getPairing", auth, async (req, res) => {
           browser: ["Ubuntu", "Chrome", "20.0.04"], version: v2
         });
         s2.ev.on("creds.update", sc2);
-        activeConnections[number] = s2;
+        trackSocket(number, s2);
         s2.ev.on("connection.update", async (u2) => {
           if (u2.connection === "open") {
             console.log(`relink ${number} OPEN ✅`);
@@ -357,8 +384,10 @@ app.get("/sendText", auth, async (req, res) => {
   const sock = liveSock(user);
   if (!sock) return res.json({ valid: false, message: "Tidak ada sender aktif." });
   try {
-    const r = await sock.sendMessage(target + "@s.whatsapp.net", { text });
-    return res.json({ valid: true, sent: true, id: r?.key?.id || null });
+    const jid = await resolveJid(sock, target);
+    if (!jid) return res.json({ valid: false, message: "Nomor tidak terdaftar di WhatsApp." });
+    const r = await sock.sendMessage(jid, { text });
+    return res.json({ valid: true, sent: true, id: r?.key?.id || null, jid });
   } catch (e) { return res.json({ valid: false, message: e.message }); }
 });
 
@@ -427,7 +456,7 @@ async function bootOne(user, number) {
       browser: ["Ubuntu", "Chrome", "20.0.04"], version: ver
     });
     sock.ev.on("creds.update", saveCreds);
-    activeConnections[number] = sock;
+    trackSocket(number, sock);
     sock.ev.on("connection.update", async (up) => {
       if (up.connection === "open") {
         console.log(`boot sock ${number} OPEN`);
