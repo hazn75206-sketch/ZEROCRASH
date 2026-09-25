@@ -617,12 +617,50 @@ app.get("/getPairing", auth, async (req, res) => {
     });
     sock.ev.on("creds.update", saveCreds);
     activeConnections[number] = sock;
+    let linkAttempts = 0;
+    const tryRelink = async () => {
+      // Re-hello pasca-pairing: user sudah input kode, selesaikan login (maks 4x)
+      if (linkAttempts >= 4) { console.log(`relink ${number} stop (max)`); return; }
+      if (activeConnections[number] && activeConnections[number].user) return; // sudah open
+      linkAttempts++;
+      console.log(`relink ${number} attempt ${linkAttempts}/4`);
+      try {
+        const { state: st2, saveCreds: sc2 } = await useMultiFileAuthState(sessionDir);
+        const v2 = process.env.BAILEYS_VERSION
+          ? process.env.BAILEYS_VERSION.split(",").map(x => parseInt(x.trim()))
+          : (await fetchLatestBaileysVersion()).version;
+        const s2 = makeWASocket({
+          keepAliveIntervalMs: 50000, logger: pino({ level: "silent" }), auth: st2,
+          syncFullHistory: true, markOnlineOnConnect: true, connectTimeoutMs: 60000,
+          defaultQueryTimeoutMs: 0, generateHighQualityLinkPreview: true,
+          browser: ["Ubuntu", "Chrome", "20.0.04"], version: v2
+        });
+        s2.ev.on("creds.update", sc2);
+        activeConnections[number] = s2;
+        s2.ev.on("connection.update", async (u2) => {
+          if (u2.connection === "open") {
+            console.log(`relink ${number} OPEN ✅`);
+            try {
+              const src = path.join(sessionDir, "creds.json");
+              const dst = path.join("permenmd", user, `${number}.json`);
+              if (fs.existsSync(src)) fs.writeFileSync(dst, fs.readFileSync(src));
+            } catch(e){}
+          } else if (u2.connection === "close") {
+            const c2 = u2.lastDisconnect?.error?.output?.statusCode;
+            if (c2 === DisconnectReason.loggedOut) { delete activeConnections[number]; return; }
+            setTimeout(tryRelink, 8000);
+          }
+        });
+      } catch(e) { console.log(`relink ${number} err: ${e.message}`); setTimeout(tryRelink, 8000); }
+    };
     sock.ev.on("connection.update", async (update) => {
       const { connection, lastDisconnect } = update;
       if (connection === "close") {
         const code = lastDisconnect?.error?.output?.statusCode;
         console.log(`pairing sock ${number} closed (${code})`);
-        if (code === DisconnectReason.loggedOut) delete activeConnections[number];
+        if (code === DisconnectReason.loggedOut) { delete activeConnections[number]; return; }
+        // Kemungkinan user baru saja input kode (515) -> reconnect untuk selesaikan login
+        setTimeout(tryRelink, 5000);
       } else if (connection === "open") {
         console.log(`pairing sock ${number} linked/open`);
         try {
