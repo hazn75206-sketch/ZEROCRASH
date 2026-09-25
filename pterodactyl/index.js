@@ -56,19 +56,14 @@ const { Client } = require('ssh2');
 const DB_PATH = "./database.json";
 let activeKeys = {};
 const KEY_FILE = path.join(__dirname, 'keyList.json');
-const bugs = [
-  { bug_id: "crash_spam", bug_name: "UIX By @permen_md" },
-  { bug_id: "spam_call", bug_name: "Prank Call By @permen_md" },
-  { bug_id: "hard", bug_name: "XKillers By @permen_md ( Android & IOS )" },
-  { bug_id: "cxinv", bug_name: "CRASH INVIS BY 7eppeli.pdf" },
-  { bug_id: "click", bug_name: "CRASH CLICK" },
-  { bug_id: "android", bug_name: "CRASH UI" },
-  { bug_id: "invisible", bug_name: "DELAY INVISIBLE" },
-  { bug_id: "ios_invis", bug_name: "FC IOS INVISIBLE" },
-  { bug_id: "ios_noinvis", bug_name: "CRASH IOS" },
-  
-  //{ bug_id: "ui_kill", bug_name: "Android UI Killer" },
-];
+// listBug Zero Crash diambil dari db.json (bugs Mantax dihapus permanen)
+function zcBugs() {
+  try {
+    const zc = loadZC();
+    if (zc && Array.isArray(zc.bugs)) return zc.bugs;
+  } catch(e){}
+  return [];
+}
 let cncActive = true; // Flag CNC
 let vpsList = [];
 let vpsConnections = {}
@@ -1163,7 +1158,7 @@ return res.json({
   key,
   expiredDate: user.expiredDate,
   role: user.role || "member",
-  listBug: bugs,
+  listBug: zcBugs(),
   news
 });
 });
@@ -1216,7 +1211,7 @@ app.get("/myInfo", (req, res) => {
     password: "******",
     expiredDate: user.expiredDate,
     role: user.role || "member",
-    listBug: bugs,
+    listBug: zcBugs(),
     news: news // ✅ Tambahkan ini
   });
 });
