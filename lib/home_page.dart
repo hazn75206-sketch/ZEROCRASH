@@ -86,7 +86,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       return widget.listBug.where((b) => !(b['bug_id'] ?? '').toString().contains('_group')).toList();
     }
   }
-  }
 
   Future<void> _fetchSenderStats() async {
     try {
