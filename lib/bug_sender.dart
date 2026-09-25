@@ -75,8 +75,16 @@ class _BugSenderPageState extends State<BugSenderPage>
         final data = jsonDecode(response.body);
         if (data["valid"] == true) {
           if (mounted) {
+            final seen = <String>{};
+            final uniq = <dynamic>[];
+            for (final s in (data["connections"] as List? ?? [])) {
+              final k = ((s is Map ? (s['phone'] ?? s['sessionName'] ?? s['id']) : s) ?? '').toString();
+              if (k.isEmpty || seen.contains(k)) continue;
+              seen.add(k);
+              uniq.add(s);
+            }
             setState(() {
-              senderList = data["connections"] ?? [];
+              senderList = uniq;
             });
           }
         } else {
@@ -505,7 +513,10 @@ class _BugSenderPageState extends State<BugSenderPage>
   }
 
   Widget _buildSenderCard(Map<String, dynamic> sender, int index) {
-    final name = sender['sessionName'] ?? 'WhatsApp Sender';
+    final name = (sender['phone'] ?? sender['sessionName'] ?? 'WhatsApp Sender').toString();
+    final bool connected = sender['connected'] == true;
+    final Color statusColor = connected ? Colors.greenAccent : Colors.redAccent;
+    final String statusText = connected ? 'ONLINE' : 'OFFLINE';
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -567,9 +578,9 @@ class _BugSenderPageState extends State<BugSenderPage>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: _gold.withValues(alpha: 0.08),
+                    color: statusColor.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: _gold.withValues(alpha: 0.25)),
+                    border: Border.all(color: statusColor.withValues(alpha: 0.25)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -581,11 +592,11 @@ class _BugSenderPageState extends State<BugSenderPage>
                             width: 6,
                             height: 6,
                             decoration: BoxDecoration(
-                              color: _gold,
+                              color: statusColor,
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: _gold.withValues(
+                                  color: statusColor.withValues(
                                       alpha: _pulseAnimation.value),
                                   blurRadius: 5,
                                   spreadRadius: 1,
@@ -596,10 +607,10 @@ class _BugSenderPageState extends State<BugSenderPage>
                         },
                       ),
                       const SizedBox(width: 6),
-                      const Text(
-                        "ONLINE",
+                      Text(
+                        statusText,
                         style: TextStyle(
-                          color: _gold,
+                          color: statusColor,
                           fontSize: 9,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'ShareTechMono',

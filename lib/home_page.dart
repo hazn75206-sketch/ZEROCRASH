@@ -598,10 +598,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               const SizedBox(height: 20),
               _buildInputPanel(),
               const SizedBox(height: 16),
-              if (widget.role == 'owner' || widget.role == 'vip') ...[
-                _buildSenderToggle(),
-                const SizedBox(height: 16),
-              ],
+              _buildSenderToggle(),
+              const SizedBox(height: 16),
               _buildSendButton(),
               const SizedBox(height: 40),
               Center(
