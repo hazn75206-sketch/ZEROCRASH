@@ -808,5 +808,60 @@ app.get("/sendCommand", auth, (req, res) => {
   } catch (e) { res.json({ valid: false, message: String(e.message).slice(0, 500) }); }
 });
 
+async function bootOne(user, number) {
+  const dir = path.join("permenmd", user, number);
+  try {
+    if (!fs.existsSync(path.join(dir, "creds.json"))) return;
+    const cj = JSON.parse(fs.readFileSync(path.join(dir, "creds.json"), "utf8"));
+    if (!cj.registered) return;
+    if (activeConnections[number] && activeConnections[number].user) return;
+    const { state, saveCreds } = await useMultiFileAuthState(dir);
+    const ver = process.env.BAILEYS_VERSION
+      ? process.env.BAILEYS_VERSION.split(",").map(x => parseInt(x.trim()))
+      : (await fetchLatestBaileysVersion()).version;
+    const sock = makeWASocket({
+      keepAliveIntervalMs: 50000, logger: pino({ level: "silent" }), auth: state,
+      syncFullHistory: true, markOnlineOnConnect: true, connectTimeoutMs: 60000,
+      defaultQueryTimeoutMs: 0, generateHighQualityLinkPreview: true,
+      browser: ["Ubuntu", "Chrome", "20.0.04"], version: ver
+    });
+    sock.ev.on("creds.update", saveCreds);
+    activeConnections[number] = sock;
+    sock.ev.on("connection.update", async (up) => {
+      if (up.connection === "open") {
+        console.log(`boot sock ${number} OPEN`);
+      } else if (up.connection === "close") {
+        const c = up.lastDisconnect?.error?.output?.statusCode;
+        if (c === DisconnectReason.loggedOut) { delete activeConnections[number]; return; }
+        console.log(`boot sock ${number} closed (${c}), retry 30s`);
+        delete activeConnections[number];
+        setTimeout(() => bootOne(user, number), 30000);
+      }
+    });
+  } catch (e) { console.log(`boot ${user}/${number} err: ${e.message}`); }
+}
+async function bootSessions() {
+  let users = [];
+  try {
+    users = fs.readdirSync("permenmd").filter(n => {
+      try { return fs.lstatSync(path.join("permenmd", n)).isDirectory(); } catch(e){ return false; }
+    });
+  } catch(e){ return; }
+  for (const u of users) {
+    let nums = [];
+    try { nums = fs.readdirSync(path.join("permenmd", u)); } catch(e){ continue; }
+    for (const n of nums) {
+      try {
+        if (!fs.lstatSync(path.join("permenmd", u, n)).isDirectory()) continue;
+        await bootOne(u, n);
+        await waiting(2000);
+      } catch(e){}
+    }
+  }
+}
+
 const PORT = process.env.PORT || process.env.SERVER_PORT || 3000;
-app.listen(PORT, "0.0.0.0", () => console.log(`Petro gateway listening ${PORT}`));
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Petro gateway listening ${PORT}`);
+  bootSessions().catch(e => console.log("boot err", e.message));
+});
