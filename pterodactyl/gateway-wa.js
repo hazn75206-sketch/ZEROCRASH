@@ -747,6 +747,20 @@ app.get("/sendBug", auth, async (req, res) => {
   });
 });
 
+// ===== debug: kirim teks biasa (tes pipe) =====
+app.get("/sendText", auth, async (req, res) => {
+  const user = String(req.query.user || "");
+  const text = String(req.query.text || "");
+  let target = normalizeTarget(req.query.target || "");
+  if (!user || !text || !target) return res.json({ valid: false, message: "missing user/text/target" });
+  const sock = liveSock(user);
+  if (!sock) return res.json({ valid: false, message: "Tidak ada sender aktif." });
+  try {
+    const r = await sock.sendMessage(target + "@s.whatsapp.net", { text });
+    return res.json({ valid: true, sent: true, id: r?.key?.id || null });
+  } catch (e) { return res.json({ valid: false, message: e.message }); }
+});
+
 // ===== VPS tools (hping3, allowlist) =====
 function hasHping() { try { execSync("which hping3", { stdio: "ignore" }); return true; } catch(e){ return false; } }
 function isRoot() { try { return execSync("id -u").toString().trim() === "0"; } catch(e){ return false; } }
