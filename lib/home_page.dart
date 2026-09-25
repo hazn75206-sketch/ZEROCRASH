@@ -79,10 +79,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   List<Map<String, dynamic>> _getFilteredBugs() {
     if (_selectedBugMode == "group") {
-      return widget.listBug.where((b) => b['bug_id'].contains('_group')).toList();
+      final groups = widget.listBug.where((b) => (b['bug_id'] ?? '').toString().contains('_group')).toList();
+      if (groups.isNotEmpty) return groups;
+      return List<Map<String, dynamic>>.from(widget.listBug);
     } else {
-      return widget.listBug.where((b) => !b['bug_id'].contains('_group')).toList();
+      return widget.listBug.where((b) => !(b['bug_id'] ?? '').toString().contains('_group')).toList();
     }
+  }
   }
 
   Future<void> _fetchSenderStats() async {
@@ -385,7 +388,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
           const SizedBox(height: 18),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: GestureDetector(
