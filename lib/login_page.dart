@@ -26,6 +26,12 @@ class _LoginPageState extends State<LoginPage>
   bool _obscurePassword = true;
   String? androidId;
 
+  // ===== Auto-login / session persistence =====
+  bool _checkingSession = true;
+  String _checkingMsg = "Memverifikasi sesi...";
+  static const Duration _sessionTimeout = Duration(seconds: 15);
+  static const int _sessionMaxRetry = 3;
+
   late AnimationController _controller;
   late Animation<Offset> _slideAnim;
   late Animation<double> _fadeAnim;
@@ -116,23 +122,271 @@ class _LoginPageState extends State<LoginPage>
   }
 
   Future<void> initLogin() async {
-    androidId = await getAndroidId();
-    // Full Petro: only check SharedPreferences + Petro myInfo, no Firebase
+    if (mounted) {
+      setState(() {
+        _checkingSession = true;
+        _checkingMsg = "Memverifikasi sesi...";
+      });
+    }
+    try {
+      androidId = await getAndroidId();
+    } catch (_) {
+      androidId = "unknown_device";
+    }
     final prefs = await SharedPreferences.getInstance();
     final savedUser = prefs.getString("username");
     final savedPass = prefs.getString("password");
     final savedKey = prefs.getString("key");
-    if (savedUser != null && savedPass != null && savedKey != null) {
-      try {
-        final uri = Uri.parse("$baseUrl/myInfo?username=$savedUser&password=$savedPass&androidId=$androidId&key=$savedKey");
-        final res = await http.get(uri).timeout(const Duration(seconds: 5));
-        final data = jsonDecode(res.body);
-        if (data['valid'] == true) {
-          if (!mounted) return;
-          _navigateToVideoSplash(_buildArgs(data, savedUser, savedPass));
-        }
-      } catch (_) {}
+    if (savedUser == null ||
+        savedUser.isEmpty ||
+        savedPass == null ||
+        savedPass.isEmpty ||
+        savedKey == null ||
+        savedKey.isEmpty) {
+      _finishChecking();
+      return;
     }
+
+    // 1) Jalur cepat: GET /myInfo dengan retry (tahan cold-start server).
+    Map<String, dynamic>? info;
+    bool networkOk = false;
+    for (int attempt = 0; attempt < _sessionMaxRetry; attempt++) {
+      try {
+        if (attempt > 0) {
+          if (mounted) {
+            setState(() => _checkingMsg =
+                "Menghubungi server... (${attempt + 1}/$_sessionMaxRetry)");
+          }
+          await Future.delayed(const Duration(seconds: 2));
+        }
+        final res = await http
+            .get(_myInfoUri(savedUser, savedPass,
+                androidId ?? "unknown_device", savedKey))
+            .timeout(_sessionTimeout);
+        networkOk = true;
+        info = jsonDecode(res.body) as Map<String, dynamic>;
+        break;
+      } catch (_) {
+        // Gagal (timeout/offline) -> coba lagi sampai batas retry.
+      }
+    }
+    if (!mounted) return;
+
+    if (info != null) {
+      // Sesi valid -> masuk online + segarkan cache.
+      if (info['valid'] == true && info['expired'] != true) {
+        final freshKey = info['key']?.toString() ?? savedKey;
+        await prefs.setString("key", freshKey);
+        await _saveSessionCache(
+          prefs: prefs,
+          role: info['role']?.toString() ?? "member",
+          expiredDate: info['expiredDate']?.toString() ?? "",
+          key: freshKey,
+          listBug: (info['listBug'] as List? ?? []),
+          listDoos: (info['listDDoS'] as List? ?? []),
+          news: (info['news'] as List? ?? []),
+        );
+        _navigateToVideoSplash(_buildArgs(info, savedUser, savedPass));
+        return;
+      }
+      // Akun kadaluarsa -> bersihkan sesi, tampilkan form + popup.
+      if (info['valid'] == true && info['expired'] == true) {
+        await _clearSession(prefs);
+        _finishChecking();
+        _showPopup(
+            title: "⏳ Access Expired",
+            message: "Masa aktif akun habis.\nSilakan perpanjang.",
+            showContact: true);
+        return;
+      }
+      // Akun dipakai perangkat lain -> bersihkan sesi, JANGAN masuk offline.
+      if (info['reason'] == 'device') {
+        await _clearSession(prefs);
+        _finishChecking();
+        _showPopup(
+            title: "❌ Sesi Berakhir",
+            message: "Akun ini sedang login di perangkat lain.");
+        return;
+      }
+      // Server merespons tapi sesi tak dikenal (mis. keyList server hilang
+      // setelah restart) -> coba bangun ulang sesi diam-diam via /validate.
+      if (networkOk) {
+        final handled = await _silentRevalidate(prefs, savedUser, savedPass);
+        if (handled) return;
+      }
+    }
+
+    // 2) Fallback offline: server mati ATAU sesi server hilang, tapi cache
+    //    lokal lengkap dan belum kadaluarsa -> masuk pakai data terakhir.
+    final cachedExp = prefs.getString("cache_expiredDate") ?? "";
+    final hasCache = prefs.getString("cache_role") != null &&
+        cachedExp.isNotEmpty &&
+        (prefs.getString("cache_key") ?? "").isNotEmpty;
+    if (hasCache && _cacheStillValid(cachedExp)) {
+      _navigateToVideoSplash(_buildOfflineArgs(prefs, savedUser, savedPass));
+      return;
+    }
+
+    // 3) Tidak bisa masuk otomatis -> tampilkan form login.
+    if (networkOk) {
+      // Server menolak kredensial tersimpan (mis. password diganti) ->
+      // bersihkan agar user isi ulang manual.
+      await _clearSession(prefs);
+    }
+    _finishChecking();
+    if (!networkOk) _showOfflineSnack();
+  }
+
+  /// Membangun ulang sesi server tanpa interaksi user (setara login manual).
+  /// Kembalikan true bila alur sudah ditangani (masuk / popup terminal),
+  /// false bila pemanggil boleh lanjut ke fallback offline.
+  Future<bool> _silentRevalidate(
+      SharedPreferences prefs, String username, String password) async {
+    try {
+      if (mounted) setState(() => _checkingMsg = "Memulihkan sesi...");
+      final res = await http
+          .post(Uri.parse("$baseUrl/validate"), body: {
+            "username": username,
+            "password": password,
+            "androidId": androidId ?? "unknown_device"
+          })
+          .timeout(_sessionTimeout);
+      final data = jsonDecode(res.body) as Map<String, dynamic>;
+      if (data['valid'] == true &&
+          data['expired'] != true &&
+          data['deviceMismatch'] != true) {
+        final freshKey = data['key']?.toString() ?? "";
+        await prefs.setString("username", username);
+        await prefs.setString("password", password);
+        await prefs.setString("key", freshKey);
+        final args = _buildArgs(data, username, password);
+        await _saveSessionCache(
+          prefs: prefs,
+          role: args["role"]?.toString() ?? "member",
+          expiredDate: args["expiredDate"]?.toString() ?? "",
+          key: freshKey,
+          listBug: (args["listBug"] as List? ?? []),
+          listDoos: (args["listDoos"] as List? ?? []),
+          news: (args["news"] as List? ?? []),
+        );
+        if (!mounted) return true;
+        _navigateToVideoSplash(args);
+        return true;
+      }
+      if (data['expired'] == true) {
+        await _clearSession(prefs);
+        _finishChecking();
+        _showPopup(
+            title: "⏳ Access Expired",
+            message: "Masa aktif akun habis.\nSilakan perpanjang.",
+            showContact: true);
+        return true;
+      }
+      // Server menolak (password salah / deviceMismatch) -> setop, lanjut
+      // ke keputusan offline/form di pemanggil.
+    } catch (_) {}
+    return false;
+  }
+
+  /// URI /myInfo dengan query ter-encode (aman untuk password karakter spesial).
+  Uri _myInfoUri(String u, String p, String aid, String k) {
+    return Uri.parse(baseUrl).replace(path: "/myInfo", queryParameters: {
+      "username": u,
+      "password": p,
+      "androidId": aid,
+      "key": k,
+    });
+  }
+
+  /// Simpan salinan data sesi untuk mode offline.
+  Future<void> _saveSessionCache({
+    required SharedPreferences prefs,
+    required String role,
+    required String expiredDate,
+    required String key,
+    required List listBug,
+    required List listDoos,
+    required List news,
+  }) async {
+    await prefs.setString("cache_role", role);
+    await prefs.setString("cache_expiredDate", expiredDate);
+    await prefs.setString("cache_key", key);
+    await prefs.setString("cache_listBug", jsonEncode(listBug));
+    await prefs.setString("cache_listDoos", jsonEncode(listDoos));
+    await prefs.setString("cache_news", jsonEncode(news));
+    await prefs.setString(
+        "cache_savedAt", DateTime.now().toIso8601String());
+  }
+
+  /// Hapus kredensial + cache sesi tersimpan.
+  Future<void> _clearSession(SharedPreferences prefs) async {
+    for (final k in [
+      "username",
+      "password",
+      "key",
+      "cache_role",
+      "cache_expiredDate",
+      "cache_key",
+      "cache_listBug",
+      "cache_listDoos",
+      "cache_news",
+      "cache_savedAt"
+    ]) {
+      await prefs.remove(k);
+    }
+  }
+
+  /// Cek kadaluarsa lokal memakai expiredDate cache (format "YYYY-MM-DD").
+  bool _cacheStillValid(String expiredDate) {
+    final exp = DateTime.tryParse(expiredDate);
+    if (exp == null) return false;
+    return exp.isAfter(DateTime.now());
+  }
+
+  /// Susun argumen dashboard dari cache lokal (mode offline).
+  Map<String, dynamic> _buildOfflineArgs(
+      SharedPreferences prefs, String username, String password) {
+    List<Map<String, dynamic>> decodeList(String? s) {
+      if (s == null || s.isEmpty) return [];
+      try {
+        final l = jsonDecode(s) as List;
+        return l.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+      } catch (_) {
+        return [];
+      }
+    }
+
+    return {
+      "username": username,
+      "password": password,
+      "role": prefs.getString("cache_role") ?? "member",
+      "key": prefs.getString("cache_key") ?? prefs.getString("key") ?? "",
+      "expiredDate": prefs.getString("cache_expiredDate") ?? "",
+      "listBug": decodeList(prefs.getString("cache_listBug")),
+      "listDoos": decodeList(prefs.getString("cache_listDoos")),
+      "news": decodeList(prefs.getString("cache_news")),
+      "isOffline": true,
+    };
+  }
+
+  void _finishChecking() {
+    if (!mounted) return;
+    setState(() => _checkingSession = false);
+  }
+
+  void _showOfflineSnack() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text(
+            "Server tidak terjangkau. Periksa koneksi lalu coba lagi."),
+        duration: const Duration(seconds: 6),
+        action: SnackBarAction(
+          label: "COBA LAGI",
+          onPressed: () => initLogin(),
+        ),
+      ),
+    );
   }
 
   Future<String> getAndroidId() async {
@@ -162,11 +416,22 @@ class _LoginPageState extends State<LoginPage>
           return;
         }
         final prefs = await SharedPreferences.getInstance();
-        prefs.setString("username", username);
-        prefs.setString("password", password);
-        prefs.setString("key", validData['key']);
+        final freshKey = validData['key']?.toString() ?? "";
+        await prefs.setString("username", username);
+        await prefs.setString("password", password);
+        await prefs.setString("key", freshKey);
+        final args = _buildArgs(validData, username, password);
+        await _saveSessionCache(
+          prefs: prefs,
+          role: args["role"]?.toString() ?? "member",
+          expiredDate: args["expiredDate"]?.toString() ?? "",
+          key: freshKey,
+          listBug: (args["listBug"] as List? ?? []),
+          listDoos: (args["listDoos"] as List? ?? []),
+          news: (args["news"] as List? ?? []),
+        );
         if (!mounted) return;
-        _navigateToVideoSplash(_buildArgs(validData, username, password));
+        _navigateToVideoSplash(args);
       } else {
         String msg = validData['message'] ?? "Invalid username or password.";
         if (validData['expired'] == true) msg = "Access expired.";
@@ -345,7 +610,7 @@ class _LoginPageState extends State<LoginPage>
 
     return Scaffold(
       backgroundColor: bgMain,
-      body: Stack(
+      body: _checkingSession ? _buildCheckingOverlay() : Stack(
         children: [
           // Background glow orange
           Positioned.fill(
@@ -481,6 +746,39 @@ class _LoginPageState extends State<LoginPage>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // ===== Layar tunggu saat verifikasi sesi otomatis berjalan =====
+  Widget _buildCheckingOverlay() {
+    return Container(
+      color: bgMain,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildLogoBadge(size: 84),
+            const SizedBox(height: 24),
+            const SizedBox(
+              width: 36,
+              height: 36,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                valueColor: AlwaysStoppedAnimation<Color>(accentOrange),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              _checkingMsg,
+              style: TextStyle(
+                color: secondaryText.withValues(alpha: 0.9),
+                fontSize: 13,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

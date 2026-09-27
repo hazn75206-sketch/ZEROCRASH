@@ -61,6 +61,7 @@ class _VideoSplashPageState extends State<VideoSplashPage> {
             role: widget.dashboardArgs['role'],
             sessionKey: widget.dashboardArgs['key'],
             expiredDate: widget.dashboardArgs['expiredDate'],
+            isOffline: widget.dashboardArgs['isOffline'] == true,
             listBug: List<Map<String, dynamic>>.from(
                 widget.dashboardArgs['listBug'] ?? []),
             listDoos: List<Map<String, dynamic>>.from(

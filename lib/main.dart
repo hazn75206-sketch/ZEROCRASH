@@ -76,6 +76,7 @@ class MyApp extends StatelessWidget {
                 listBug: List<Map<String, dynamic>>.from(args['listBug'] ?? []),
                 listDoos: List<Map<String, dynamic>>.from(args['listDoos'] ?? []),
                 news: List<Map<String, dynamic>>.from(args['news'] ?? []),
+                isOffline: args['isOffline'] == true,
               ),
             );
 

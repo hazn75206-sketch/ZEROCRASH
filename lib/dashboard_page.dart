@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -35,6 +37,7 @@ class DashboardPage extends StatefulWidget {
   final List<Map<String, dynamic>> listBug;
   final List<Map<String, dynamic>> listDoos;
   final List<dynamic> news;
+  final bool isOffline;
 
   const DashboardPage({
     super.key,
@@ -46,6 +49,7 @@ class DashboardPage extends StatefulWidget {
     required this.listDoos,
     required this.sessionKey,
     required this.news,
+    this.isOffline = false,
   });
 
   @override
@@ -77,6 +81,8 @@ class _DashboardPageState extends State<DashboardPage>
 
   int onlineUsers = 0;
   int activeConnections = 0;
+  bool isOffline = false;
+  Timer? _statsTimer;
 
   late PageController _newsPageController;
   double _currentNewsPage = 0.0;
@@ -107,6 +113,7 @@ class _DashboardPageState extends State<DashboardPage>
     listBug = widget.listBug;
     listDoos = widget.listDoos;
     newsList = widget.news;
+    isOffline = widget.isOffline;
 
     _initNewsBanner();
     _selectedPage = _buildNewsPage();
@@ -125,6 +132,7 @@ class _DashboardPageState extends State<DashboardPage>
   @override
   void dispose() {
     _newsTimer?.cancel();
+    _statsTimer?.cancel();
     _newsPageController.dispose();
     _controller.dispose();
     channel.sink.close(status.goingAway);
@@ -167,16 +175,45 @@ class _DashboardPageState extends State<DashboardPage>
     // Full Petro: WS disabled, use Petro HTTP polling for stats
     // Keep channel dummy to avoid null, but use HTTP polling
     _pollPetroStats();
-    Timer.periodic(const Duration(seconds: 5), (_) => _pollPetroStats());
+    _statsTimer?.cancel();
+    _statsTimer =
+        Timer.periodic(const Duration(seconds: 5), (_) => _pollPetroStats());
   }
 
   Future<void> _pollPetroStats() async {
+    if (!isOffline) return; // online: tidak perlu revalidasi
     try {
-      // Use Petro ping/stats via HTTP - full to Petro, no external WS
-      // Petro returns valid user check via myInfo
-      // Poll via http to verify session still valid
-      // For now just keep onlineUsers from Petro / endpoint
-      // Fallback to 0 if offline
+      // Mode offline: cek berkala apakah server sudah kembali.
+      // Bila sesi kembali valid -> segarkan data, hapus banner offline.
+      final uri = Uri.parse(baseUrl).replace(path: "/myInfo", queryParameters: {
+        "username": username,
+        "password": password,
+        "androidId": androidId,
+        "key": sessionKey,
+      });
+      final res =
+          await http.get(uri).timeout(const Duration(seconds: 10));
+      final data = jsonDecode(res.body) as Map<String, dynamic>;
+      if (data['valid'] == true && data['expired'] != true) {
+        final prefs = await SharedPreferences.getInstance();
+        final freshKey = data['key']?.toString() ?? sessionKey;
+        await prefs.setString("key", freshKey);
+        await prefs.setString("cache_role", data['role']?.toString() ?? role);
+        await prefs.setString(
+            "cache_expiredDate", data['expiredDate']?.toString() ?? expiredDate);
+        await prefs.setString("cache_key", freshKey);
+        if (!mounted) return;
+        setState(() {
+          isOffline = false;
+          sessionKey = freshKey;
+          role = data['role']?.toString() ?? role;
+          expiredDate = data['expiredDate']?.toString() ?? expiredDate;
+          listBug = ((data['listBug'] as List? ?? []))
+              .map((e) => Map<String, dynamic>.from(e as Map))
+              .toList();
+          newsList = List<dynamic>.from(data['news'] as List? ?? []);
+        });
+      }
     } catch (_) {}
   }
 
@@ -279,6 +316,40 @@ class _DashboardPageState extends State<DashboardPage>
   //  BUILD
   // ═══════════════════════════════════════════════════════════════
 
+  /// Banner penanda mode offline (masuk pakai data terakhir tersimpan).
+  Widget _buildOfflineBanner() {
+    return SafeArea(
+      bottom: false,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        decoration: BoxDecoration(
+          color: _accent.withValues(alpha: 0.12),
+          border: Border(bottom: BorderSide(color: _accent.withValues(alpha: 0.35))),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.cloud_off_rounded, color: Color(0xFFFF8C00), size: 15),
+            SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                "MODE OFFLINE — memakai data terakhir tersimpan",
+                style: TextStyle(
+                  color: Color(0xFFFF8C00),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return FadeTransition(
@@ -287,7 +358,12 @@ class _DashboardPageState extends State<DashboardPage>
         key: _scaffoldKey,
         backgroundColor: _bgDeep,
         drawer: _buildCustomDrawer(),
-        body: _selectedPage,
+        body: Column(
+          children: [
+            if (isOffline) _buildOfflineBanner(),
+            Expanded(child: _selectedPage),
+          ],
+        ),
         bottomNavigationBar: _buildBottomNav(),
       ),
     );

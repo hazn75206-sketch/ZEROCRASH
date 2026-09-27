@@ -1168,7 +1168,10 @@ app.get("/myInfo", (req, res) => {
   console.log("[ℹ️ INFO] Fetching info for:", username);
 
   const db = loadDatabase();
-  const user = db.find(u => u.username === username && u.password === password);
+  // bcrypt-aware lookup (sama seperti /validate): dukung password plaintext & hash
+  const user = (typeof findByPassWithBcrypt === 'function')
+    ? findByPassWithBcrypt(username, password)
+    : db.find(u => u.username === username && u.password === password);
   const keyList = loadKeyList();
   const userKey = keyList.find(k => k.username === username);
   console.log(userKey)
